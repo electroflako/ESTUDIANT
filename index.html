@@ -1,168 +1,289 @@
 <!doctype html>
-<!-- =========================================================
-     ESTUDIANT – Web App (archivo único)
-     Un solo contenedor BEM: .app
-     Buenas prácticas, 100% offline/online (mejor en Netlify/Vercel)
-     Funciones: catálogo de materias (MATERIAS/catalog.json),
-                importar JSON, exportar/importar CSV, repaso/examen,
-                temporizador y persistencia local.
-     ========================================================= -->
+<!--
+  ============================================================
+  ESTUDIANT – Web App (archivo único)
+  Un solo contenedor BEM: .app
+  Funciones:
+    - Catálogo (MATERIAS/catalog.json) para cargar bancos .json desde tu sitio
+    - Importar JSON (archivo/pegado)
+    - Exportar/Importar CSV (calificar)
+    - Modo repaso/examen con temporizador y bloqueo al finalizar
+    - Persistencia (localStorage)
+    - Cabecera sticky + diseño responsive
+  Uso recomendado: desplegar en Netlify/Vercel (HTTPS)
+  ============================================================
+-->
 <html lang="es">
 <head>
-  <!-- ============== Metadatos ============== -->
+  <!-- ========== Metadatos básicos ========== -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ESTUDIANT</title>
 
-  <!-- ============== CSS (BEM) ============== -->
+  <!-- ========== CSS (BEM + responsive) ========== -->
   <style>
-    /* ===== Tema ===== */
+    /* --------------------------------------------------------
+       Tema y escala de espacios
+       -------------------------------------------------------- */
     :root{
       --bg:#0b1020; --bg2:#0e1530; --card:#121a33;
       --text:#e9efff; --muted:#a9b7db; --border:#22305c;
       --accent:#5dd0ff; --ok:#35d49a; --bad:#ff6b6b; --warn:#ffd166;
+      --s-1:8px; --s-2:12px; --s-3:16px; --s-4:20px;
+      --radius:12px;
     }
-    /* ===== Reset mínimo ===== */
-    *{box-sizing:border-box}
-    html,body{height:100%}
+
+    /* --------------------------------------------------------
+       Reset mínimo
+       -------------------------------------------------------- */
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
     body{
-      margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
-      color:var(--text); background:linear-gradient(180deg,var(--bg),var(--bg2) 45%,var(--bg));
+      margin:0;
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,var(--bg),var(--bg2) 45%,var(--bg));
     }
 
-    /* =========================================================
+    /* --------------------------------------------------------
        Bloque único: .app (contenedor raíz)
-       ========================================================= */
-    .app{max-width:1040px; margin:28px auto; padding:0 16px}
-    .app__header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px}
-    .app__title{margin:0 0 6px; font-size:1.6rem; letter-spacing:.02em}
-    .app__subtitle{margin:0; color:var(--muted)}
-    .app__toolbar{display:flex; flex-wrap:wrap; gap:10px}
-    .app__stats{color:var(--muted); font-size:.95rem; display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:6px}
-    .app__list{margin-top:12px}
-    .app__footer{margin:22px 0 38px; color:var(--muted); font-size:.9rem}
+       -------------------------------------------------------- */
+    .app{
+      max-width:clamp(320px, 96vw, 1040px);
+      margin:28px auto;
+      padding:0 var(--s-3);
+    }
 
-    /* ===== Botón (elemento) ===== */
-    .app__btn{appearance:none; border:none; border-radius:10px; padding:10px 14px;
-              background:#1a2548; color:var(--text); cursor:pointer;
-              border:1px solid var(--border); transition:transform .05s ease, background .2s ease}
-    .app__btn:hover{background:#1e2b56}
-    .app__btn:active{transform:scale(.98)}
-    .app__btn[disabled]{opacity:.55; cursor:not-allowed}
-    .app__btn--accent{background:#1a364f; border-color:#2b6ca0}
-    .app__btn--ok{background:#163b2f; border-color:#1f7a5f}
-    .app__btn--warn{background:#3d2f13; border-color:#906d26}
-    .app__btn--danger{background:#4a1f1f; border-color:#8a3030}
+    /* Cabecera (sticky) */
+    .app__header{
+      display:flex; align-items:center; justify-content:space-between; gap:var(--s-3);
+      margin-bottom:var(--s-3);
+    }
+    .app__header--sticky{
+      /* Se “pega” al llegar arriba al hacer scroll */
+      position:sticky; top:0; z-index:1000;
+      background:linear-gradient(180deg, var(--card), rgba(18,26,51,.88));
+      backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+      padding-top:calc(var(--s-2) + env(safe-area-inset-top, 0px));
+      border-bottom:1px solid var(--border);
+    }
 
-    /* ===== Píldora (elemento) ===== */
-    .app__pill{padding:.1rem .5rem; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:.78rem}
+    .app__title{ margin:0 0 6px; font-size:1.6rem; letter-spacing:.02em }
+    .app__subtitle{ margin:0; color:var(--muted) }
 
-    /* =========================================================
-       Panel (elementos reutilizables: import, modo, catálogo, CSV)
-       ========================================================= */
-    .app__panel{margin:10px 0 12px}
-    .app__panel-summary{cursor:pointer; color:var(--accent)}
-    .app__panel-body{border:1px solid var(--border); background:#0f1732; padding:12px; border-radius:12px; margin-top:8px; display:grid; gap:10px}
-    .app__panel-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    .app__panel-input{padding:8px; border-radius:8px; border:1px solid var(--border); background:#0b132a; color:var(--text)}
-    .app__panel-textarea{width:100%; min-height:120px; padding:10px; border-radius:8px; border:1px solid var(--border); background:#0b132a; color:var(--text); resize:vertical; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
-    .app__panel-hint{color:var(--muted); font-size:.9rem}
+    .app__toolbar{ display:flex; flex-wrap:wrap; gap:var(--s-2) }
+    .app__stats{
+      color:var(--muted); font-size:.95rem;
+      display:flex; gap:var(--s-2); flex-wrap:wrap; align-items:center;
+      margin-top:var(--s-2)
+    }
 
-    /* =========================================================
-       Tarjeta de pregunta: .app__card (+ modificadores)
-       ========================================================= */
-    .app__card{background:rgba(18,26,51,.86); border:1px solid var(--border); border-radius:14px; padding:16px 16px 10px; margin:14px 0}
-    .app__card--ok{border-left:6px solid var(--ok)}
-    .app__card--bad{border-left:6px solid var(--bad)}
-    .app__card-head{display:flex; gap:8px; margin-bottom:6px}
-    .app__card-tag{font-size:.8rem; color:#9fb0d4; background:#162149; border:1px solid var(--border); padding:2px 8px; border-radius:999px}
-    .app__card-title{margin:0; font-size:1.02rem}
-    .app__card-options{display:grid; gap:10px; margin:10px 0 6px}
-    .app__card-option{display:flex; gap:10px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0f1732}
-    .app__card-option input{margin-top:2px; transform:scale(1.15)}
-    .app__card-option--correct{outline:2px solid rgba(53,212,154,.7); background:#0f1f1a}
-    .app__card-option--wrong{outline:2px solid rgba(255,107,107,.65); background:#281515}
-    .app__card-actions{display:flex; gap:8px; margin-top:8px}
-    .app__card-hint{font-size:.9rem; color:var(--muted); margin-left:auto}
-    .app__card-feedback{margin-top:8px; font-weight:600}
-    .app__card-feedback--ok{color:var(--ok)}
-    .app__card-feedback--bad{color:var(--bad)}
-    .app__card-feedback--muted{color:var(--muted)}
-    .app__card-exp{margin-top:8px; padding:10px 12px; border:1px dashed var(--border); border-radius:10px; color:var(--muted); background:#0e1630; display:none}
+    .app__list{ margin-top:var(--s-3) }
+    .app__footer{ margin:22px 0 38px; color:var(--muted); font-size:.9rem }
 
-    /* ===== Modificadores de modo sobre el contenedor ===== */
-    .app--exam .app__card-actions{display:none}
-    .app--exam .app__card-exp{display:none !important}
-    .app--exam #pill-timer{display:inline-block}
-    #pill-timer{display:none}
-    .app--exam #pill-score{visibility:hidden}
-    .app--exam.app--finished #pill-score{visibility:visible}
-    .app--exam.app--finished .app__card input[type="radio"]{pointer-events:none}
+    /* --------------------------------------------------------
+       Botón (elemento con modificadores)
+       -------------------------------------------------------- */
+    .app__btn{
+      appearance:none; border:none; border-radius:10px; padding:10px 14px;
+      background:#1a2548; color:var(--text); cursor:pointer;
+      border:1px solid var(--border);
+      transition:transform .05s ease, background .2s ease;
+      min-height:44px; /* accesible en táctil */
+    }
+    .app__btn:hover{ background:#1e2b56 }
+    .app__btn:active{ transform:scale(.98) }
+    .app__btn[disabled]{ opacity:.55; cursor:not-allowed }
+    .app__btn--accent{ background:#1a364f; border-color:#2b6ca0 }
+    .app__btn--ok{ background:#163b2f; border-color:#1f7a5f }
+    .app__btn--warn{ background:#3d2f13; border-color:#906d26 }
+    .app__btn--danger{ background:#4a1f1f; border-color:#8a3030 }
+
+    /* Píldoras de estado */
+    .app__pill{
+      padding:.1rem .5rem; border-radius:999px;
+      border:1px solid var(--border); color:var(--muted); font-size:.78rem
+    }
+
+    /* --------------------------------------------------------
+       Paneles reutilizables (import, catálogo, modo, resumen CSV)
+       -------------------------------------------------------- */
+    .app__panel{ margin:10px 0 12px }
+    .app__panel-summary{ cursor:pointer; color:var(--accent) }
+    .app__panel-body{
+      border:1px solid var(--border); background:#0f1732;
+      padding:var(--s-3); border-radius:var(--radius);
+      margin-top:var(--s-2); display:grid; gap:var(--s-2)
+    }
+    .app__panel-row{ display:flex; gap:var(--s-2); align-items:center; flex-wrap:wrap }
+    .app__panel-input{
+      padding:10px; border-radius:8px; border:1px solid var(--border);
+      background:#0b132a; color:var(--text)
+    }
+    .app__panel-textarea{
+      width:100%; min-height:120px; padding:10px; border-radius:8px;
+      border:1px solid var(--border); background:#0b132a; color:var(--text);
+      resize:vertical; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace
+    }
+    .app__panel-hint{ color:var(--muted); font-size:.9rem }
+
+    /* --------------------------------------------------------
+       Tarjeta de pregunta
+       -------------------------------------------------------- */
+    .app__card{
+      background:rgba(18,26,51,.86); border:1px solid var(--border);
+      border-radius:var(--radius); padding:var(--s-3) var(--s-3) var(--s-2);
+      margin:14px 0
+    }
+    .app__card--ok{ border-left:6px solid var(--ok) }
+    .app__card--bad{ border-left:6px solid var(--bad) }
+
+    .app__card-head{ display:flex; gap:var(--s-2); margin-bottom:var(--s-2) }
+    .app__card-tag{
+      font-size:.8rem; color:#9fb0d4; background:#162149;
+      border:1px solid var(--border); padding:2px 8px; border-radius:999px
+    }
+    .app__card-title{ margin:0; font-size:1.02rem }
+
+    /* Grid responsive de opciones */
+    .app__card-options{
+      display:grid; gap:var(--s-2); margin:10px 0 var(--s-2);
+      grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .app__card-option{
+      display:flex; gap:10px; padding:10px 12px; border-radius:10px;
+      border:1px solid var(--border); background:#0f1732
+    }
+    .app__card-option input{ margin-top:2px; transform:scale(1.15) }
+    .app__card-option--correct{ outline:2px solid rgba(53,212,154,.7); background:#0f1f1a }
+    .app__card-option--wrong{ outline:2px solid rgba(255,107,107,.65); background:#281515 }
+
+    .app__card-actions{ display:flex; gap:var(--s-2); margin-top:var(--s-2) }
+    .app__card-hint{ font-size:.9rem; color:var(--muted); margin-left:auto }
+    .app__card-feedback{ margin-top:var(--s-2); font-weight:600 }
+    .app__card-feedback--ok{ color:var(--ok) }
+    .app__card-feedback--bad{ color:var(--bad) }
+    .app__card-feedback--muted{ color:var(--muted) }
+    .app__card-exp{
+      margin-top:var(--s-2); padding:10px 12px; border:1px dashed var(--border);
+      border-radius:10px; color:var(--muted); background:#0e1630; display:none
+    }
+
+    /* --------------------------------------------------------
+       Modificadores de modo (sobre el contenedor raíz)
+       -------------------------------------------------------- */
+    .app--exam .app__card-actions{ display:none }
+    .app--exam .app__card-exp{ display:none !important }
+    .app--exam #pill-timer{ display:inline-block }
+    #pill-timer{ display:none }
+    .app--exam #pill-score{ visibility:hidden }
+    .app--exam.app--finished #pill-score{ visibility:visible }
+    .app--exam.app--finished .app__card input[type="radio"]{ pointer-events:none }
+
+    /* --------------------------------------------------------
+       Breakpoints Responsive
+       -------------------------------------------------------- */
+    @media (max-width: 900px){
+      .app__header{ flex-direction:column; align-items:flex-start }
+      .app__toolbar{ width:100%; justify-content:flex-start }
+    }
+    @media (max-width: 720px){
+      body{ font-size:15px }
+      .app{ margin:20px auto; padding:0 var(--s-2) }
+      .app__header{ align-items:center; text-align:center }
+      .app__toolbar{ justify-content:center }
+      .app__btn{ flex:1 1 calc(50% - var(--s-2)); min-width:44% }
+      .app__stats{ justify-content:center }
+      .app__panel-row{ flex-direction:column; align-items:stretch }
+      .app__panel-input, .app__panel-textarea, select{ width:100% }
+      .app__card-options{ grid-template-columns:1fr }
+      .app__card-hint{ display:none }
+    }
+    @media (max-width: 420px){
+      body{ font-size:14px }
+      .app__btn{ flex:1 1 100% }
+      .app__title{ font-size:1.4rem }
+      .app__panel-body{ padding:var(--s-2) }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .app__btn{ transition:none }
+    }
   </style>
 </head>
+
 <body>
   <!-- =========================================================
-       HTML – CONTENEDOR ÚNICO (Bloque .app)
+       CONTENEDOR ÚNICO (Bloque .app)
        ========================================================= -->
   <div class="app" id="app">
-    <!-- Header -->
-    <header class="app__header">
+
+    <!-- ========= Cabecera (sticky) ========= -->
+    <header class="app__header app__header--sticky">
       <div>
         <h1 class="app__title">ESTUDIANT</h1>
-        <p class="app__subtitle" id="txt-subtitle">Importar JSON/CSV, catálogo en la nube, modo repaso/examen, exportar CSV. 100% offline/online.</p>
+        <p class="app__subtitle" id="txt-subtitle">
+          Catálogo en la nube · Importar JSON/CSV · Modo repaso/examen · Exportar CSV
+        </p>
       </div>
+
       <div class="app__toolbar">
-        <button id="btn-shuffle"   class="app__btn app__btn--accent">Mezclar</button>
-        <button id="btn-check-all" class="app__btn app__btn--ok">Corregir todo</button>
-        <button id="btn-reset"     class="app__btn app__btn--warn">Reiniciar</button>
-        <button id="btn-export"    class="app__btn app__btn--ok">Exportar CSV</button>
-        <input  id="file-csv" type="file" accept=".csv,text/csv" style="display:none">
+        <button id="btn-shuffle"    class="app__btn app__btn--accent">Mezclar</button>
+        <button id="btn-check-all"  class="app__btn app__btn--ok">Corregir todo</button>
+        <button id="btn-reset"      class="app__btn app__btn--warn">Reiniciar</button>
+        <button id="btn-export"     class="app__btn app__btn--ok">Exportar CSV</button>
+        <input  id="file-csv" type="file" accept=".csv,text/csv" style="display:none" />
         <button id="btn-import-csv" class="app__btn app__btn--accent">Importar CSV</button>
         <button id="btn-swap-label" class="app__btn app__btn--accent">Intercambiar etiquetas</button>
         <button id="btn-clear"      class="app__btn app__btn--danger">Borrar datos</button>
       </div>
     </header>
 
-    <!-- Panel: Importar JSON -->
+    <!-- ========= Panel: Importar JSON ========= -->
     <details class="app__panel" id="panel-import">
       <summary class="app__panel-summary">Cargar preguntas (JSON)</summary>
       <div class="app__panel-body">
         <div class="app__panel-row">
           <input id="file-json" type="file" accept="application/json" class="app__panel-input" />
           <button id="btn-load-file" class="app__btn app__btn--accent">Cargar archivo JSON</button>
-          <span class="app__panel-hint">Recomendado para modo offline (PC/Mac).</span>
+          <span class="app__panel-hint">Recomendado para uso offline (PC/Mac).</span>
         </div>
-        <textarea id="txt-json" class="app__panel-textarea" placeholder='[{"q":"Pregunta 1","opts":["A","B","C","D"],"ans":0,"exp":"Explicación..."}]'></textarea>
+        <textarea id="txt-json" class="app__panel-textarea" placeholder='[ { "q":"Pregunta...", "opts":["A","B","C","D"], "ans":0, "exp":"..." } ]'></textarea>
         <div class="app__panel-row">
           <button id="btn-load-text" class="app__btn app__btn--ok">Cargar JSON pegado</button>
         </div>
       </div>
     </details>
 
-    <!-- Panel: Catálogo (MATERIAS/catalog.json) -->
+    <!-- ========= Panel: Catálogo (lee MATERIAS/catalog.json) ========= -->
     <details class="app__panel" id="panel-catalog">
       <summary class="app__panel-summary">Materias del repositorio</summary>
       <div class="app__panel-body">
         <div class="app__panel-row">
           <select id="catalog-select" class="app__panel-input" aria-label="Selecciona materia"></select>
           <button id="btn-load-catalog"   class="app__btn app__btn--ok">Cargar materia</button>
-          <button id="btn-reload-catalog" class="app__btn app__btn--accent" title="Vuelve a leer catalog.json">Actualizar catálogo</button>
+          <button id="btn-reload-catalog" class="app__btn app__btn--accent" title="Actualizar catálogo">Actualizar catálogo</button>
         </div>
         <div class="app__panel-row">
-          <span class="app__panel-hint">Los bancos se leen desde <code>MATERIAS/catalog.json</code> (mismo sitio en Netlify).</span>
+          <span class="app__panel-hint">
+            Se lee <code>MATERIAS/catalog.json</code> desde tu sitio. Añade/borra bancos en esa lista.
+          </span>
         </div>
       </div>
     </details>
 
-    <!-- Panel: Modo repaso/examen -->
+    <!-- ========= Panel: Modo repaso/examen ========= -->
     <details class="app__panel" id="panel-mode">
       <summary class="app__panel-summary" id="txt-mode-summary">Modo examen</summary>
       <div class="app__panel-body">
         <div class="app__panel-row">
-          <label>Duración (min):
-            <input id="inp-minutes" type="number" min="1" max="300" value="20" class="app__panel-input">
+          <label>
+            Duración (min):
+            <input id="inp-minutes" type="number" min="1" max="300" value="20" class="app__panel-input" />
           </label>
-          <label><input id="chk-shuffle" type="checkbox" checked> Mezclar al iniciar</label>
+          <label>
+            <input id="chk-shuffle" type="checkbox" checked />
+            Mezclar al iniciar
+          </label>
           <span class="app__panel-hint" id="txt-mode-hint">Sin feedback hasta “Finalizar”.</span>
         </div>
         <div class="app__panel-row">
@@ -173,236 +294,453 @@
       </div>
     </details>
 
-    <!-- Panel: Resumen import CSV -->
+    <!-- ========= Panel: Resumen de importación CSV ========= -->
     <details class="app__panel" id="panel-csv" style="display:none">
       <summary class="app__panel-summary">Resultado de la importación CSV</summary>
       <div class="app__panel-body" id="csv-summary"></div>
     </details>
 
-    <!-- Estado -->
+    <!-- ========= Estado (píldoras) ========= -->
     <div class="app__stats">
-      <span id="pill-score"  class="app__pill">Aciertos: 0 / 0</span>
-      <span id="pill-timer"  class="app__pill">00:00</span>
+      <span id="pill-score"   class="app__pill">Aciertos: 0 / 0</span>
+      <span id="pill-timer"   class="app__pill">00:00</span>
       <span id="pill-dataset" class="app__pill">Dataset: por defecto</span>
       <span class="app__pill">Archivo único (HTML+CSS/JS)</span>
     </div>
 
-    <!-- Lista de preguntas -->
+    <!-- ========= Lista de preguntas ========= -->
     <div id="list" class="app__list"></div>
 
-    <!-- Pie -->
+    <!-- ========= Pie ========= -->
     <footer class="app__footer">
-      Para iPhone/iPad, sirve desde Netlify/Vercel y añade a pantalla de inicio. Para PC/Mac, funciona local con doble clic (recomendado Chrome/Brave).
+      Para iPhone/iPad, sirve la carpeta en Netlify/Vercel y añade a pantalla de inicio desde Safari.
+      Para PC/Mac, funciona local con doble clic (Chrome/Brave recomendados).
     </footer>
-  </div>
 
-  <!-- ============== JavaScript (IIFE) ============== -->
+  </div> <!-- /.app -->
+
+  <!-- ========== JavaScript (IIFE + comentarios) ========== -->
   <script>
   (function(){
     'use strict';
 
-    /* ---------- Polyfills mínimos ---------- */
-    if(!Element.prototype.matches){Element.prototype.matches=Element.prototype.msMatchesSelector||Element.prototype.webkitMatchesSelector;}
-    if(!Element.prototype.closest){Element.prototype.closest=function(s){let e=this;while(e&&e.nodeType===1){if(e.matches(s))return e;e=e.parentElement||e.parentNode;}return null;};}
+    /* ========================================================
+       Polyfills mínimos (compatibilidad Safari/iOS antiguos)
+       ======================================================== */
+    if(!Element.prototype.matches){
+      Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
+    }
+    if(!Element.prototype.closest){
+      Element.prototype.closest = function(sel){
+        let el = this;
+        while (el && el.nodeType === 1){
+          if (el.matches(sel)) return el;
+          el = el.parentElement || el.parentNode;
+        }
+        return null;
+      };
+    }
 
-    /* ---------- Utilidades ---------- */
-    const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-    const L=['A','B','C','D'];
-    const now=()=>Date.now();
-    const pad2=n=>String(n).padStart(2,'0');
-    const fmt=ms=>`${pad2(Math.max(0,Math.floor(ms/60000)))}:${pad2(Math.max(0,Math.floor((ms%60000)/1000)))}`;
-    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-    function fp(obj){try{const s=JSON.stringify(obj);let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return'fp_'+h.toString(16);}catch{return'fp_0';}}
-    function download(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0);}
+    /* ========================================================
+       Utilidades genéricas
+       ======================================================== */
+    const $  = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+    const L  = ['A','B','C','D']; // Letras para opciones
 
-    /* ---------- Claves de storage ---------- */
-    const KEY={state:'app_state_v2', data:'app_data_v2', labels:'app_labels_v2'};
+    const now = () => Date.now();
+    const pad2 = (n) => String(n).padStart(2,'0');
+    const fmt  = (ms) => `${pad2(Math.max(0,Math.floor(ms/60000)))}:${pad2(Math.max(0,Math.floor((ms%60000)/1000)))}`;
 
-    /* ---------- DOM refs ---------- */
-    const $root=$('#app'), $list=$('#list'), $pillS=$('#pill-score'), $pillT=$('#pill-timer'), $pillD=$('#pill-dataset');
-    const $panelCSV=$('#panel-csv'), $sumCSV=$('#csv-summary');
-    const $txtModeSummary=$('#txt-mode-summary'), $txtModeHint=$('#txt-mode-hint'), $txtSubtitle=$('#txt-subtitle');
+    function shuffle(a){
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
 
-    /* ---------- Dataset por defecto (muestra) ---------- */
+    function fp(obj){
+      // Huella simple para detectar cambios de dataset
+      try{
+        const s=JSON.stringify(obj);
+        let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; }
+        return 'fp_'+h.toString(16);
+      }catch{ return 'fp_0'; }
+    }
+
+    function download(name, text){
+      // Descarga un archivo de texto en el navegador
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+      a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    }
+
+    /* ========================================================
+       Claves de almacenamiento (localStorage)
+       ======================================================== */
+    const KEY = {
+      state : 'app_state_v3',
+      data  : 'app_data_v3',
+      labels: 'app_labels_v3'
+    };
+
+    /* ========================================================
+       Referencias DOM
+       ======================================================== */
+    const $root = $('#app');
+    const $list = $('#list');
+    const $pillS = $('#pill-score');
+    const $pillT = $('#pill-timer');
+    const $pillD = $('#pill-dataset');
+    const $panelCSV = $('#panel-csv');
+    const $sumCSV   = $('#csv-summary');
+    const $txtModeSummary = $('#txt-mode-summary');
+    const $txtModeHint    = $('#txt-mode-hint');
+    const $txtSubtitle    = $('#txt-subtitle');
+
+    /* ========================================================
+       Dataset por defecto (muestra)
+       ======================================================== */
     const DEFAULT_EXAM = [
-      {q:"En lógica proposicional, si P ⇒ Q y P es falsa y Q es verdadera, entonces P ⇒ Q es:", opts:["Verdadera","Falsa","Indeterminada","Depende del contexto"], ans:0, exp:"Solo es falsa con verdadero ⇒ falso."},
-      {q:"A partir de P ⇒ Q y ¬Q, se deduce:", opts:["P","¬P","Q","P ∧ Q"], ans:1, exp:"Modus tollens."},
-      {q:"Contrarrecíproca correcta:", opts:["¬X ⇒ ¬Y","¬Y ⇒ ¬X","Y ⇒ X","X ⇒ ¬Y"], ans:1, exp:"De “X ⇒ Y” se deduce “¬Y ⇒ ¬X”."},
-      {q:"|A ∪ B| con |A|=20, |B|=15, |A∩B|=7:", opts:["22","28","34","12"], ans:1, exp:"20+15−7=28."},
-      {q:"(A ∪ B)^c =", opts:["A^c ∩ B^c","A^c ∪ B^c","A ∪ B","A ∩ B"], ans:0, exp:"De Morgan."},
-      {q:"¿Cuál es irracional?", opts:["0,12̅","√18/3","22/7","−5"], ans:1, exp:"√18/3=√2."},
-      {q:"Cerrado para la resta:", opts:["ℕ","ℤ","ℚ+","ℝ\\ℚ"], ans:1, exp:"ℤ sí; ℕ no (3−5)."},
-      {q:"Equivalente a 3/8:", opts:["9/24","6/10","12/40","15/48"], ans:0, exp:"×3/×3."},
-      {q:"A ∩ B con A=(−2,4], B=[1,6):", opts:["(−2,6)","[1,4]","(−2,1)","[4,6)"], ans:1, exp:"Solape [1,4]."},
-      {q:"(2/3 − 5/4)+1/6 =", opts:["−5/12","1/12","−1/12","−7/12"], ans:0, exp:"8/12−15/12+2/12."}
+      { q:"En lógica proposicional, si P ⇒ Q y P es falsa y Q es verdadera, entonces P ⇒ Q es:", opts:["Verdadera","Falsa","Indeterminada","Depende del contexto"], ans:0, exp:"Solo es falsa con verdadero ⇒ falso." },
+      { q:"A partir de P ⇒ Q y ¬Q, se deduce:", opts:["P","¬P","Q","P ∧ Q"], ans:1, exp:"Modus tollens." },
+      { q:"Contrarrecíproca correcta:", opts:["¬X ⇒ ¬Y","¬Y ⇒ ¬X","Y ⇒ X","X ⇒ ¬Y"], ans:1, exp:"De “X ⇒ Y” se deduce “¬Y ⇒ ¬X”." },
+      { q:"|A ∪ B| con |A|=20, |B|=15, |A∩B|=7:", opts:["22","28","34","12"], ans:1, exp:"20+15−7=28." },
+      { q:"(A ∪ B)^c =", opts:["A^c ∩ B^c","A^c ∪ B^c","A ∪ B","A ∩ B"], ans:0, exp:"De Morgan." },
+      { q:"¿Cuál es irracional?", opts:["0,12̅","√18/3","22/7","−5"], ans:1, exp:"√18/3=√2." },
+      { q:"Cerrado para la resta:", opts:["ℕ","ℤ","ℚ+","ℝ\\ℚ"], ans:1, exp:"ℤ sí; ℕ no (3−5)." },
+      { q:"Equivalente a 3/8:", opts:["9/24","6/10","12/40","15/48"], ans:0, exp:"×3/×3." },
+      { q:"A ∩ B con A=(−2,4], B=[1,6):", opts:["(−2,6)","[1,4]","(−2,1)","[4,6)"], ans:1, exp:"Solape [1,4]." },
+      { q:"(2/3 − 5/4)+1/6 =", opts:["−5/12","1/12","−1/12","−7/12"], ans:0, exp:"8/12−15/12+2/12." }
     ];
 
-    /* ---------- Estado ---------- */
-    let EXAM=[], EXAM_FP='fp_0', order=[], answers=[], result=[];
-    let labelsMode = localStorage.getItem(KEY.labels)||'examen';  // 'examen'|'repaso'
-    let mode = {isExam:false,running:false,finished:false,durationMs:0,endAt:0,timer:null};
+    /* ========================================================
+       Estado de la aplicación
+       ======================================================== */
+    let EXAM    = [];           // Banco de preguntas activo
+    let EXAM_FP = 'fp_0';       // Huella del banco
+    let order   = [];           // Índice del EXAM en cada posición visible
+    let answers = [];           // Respuesta elegida (índice 0–3) por posición
+    let result  = [];           // true/false/null por posición
 
-    /* =========================================================
-       Render y lógica de tarjetas
-       ========================================================= */
-    function render({shuffleOptions=false, resetOrder=true}={}){
-      if(resetOrder) order=EXAM.map((_,i)=>i);
-      $list.innerHTML='';
+    let labelsMode = localStorage.getItem(KEY.labels) || 'examen'; // 'examen'|'repaso'
+    let mode = { isExam:false, running:false, finished:false, durationMs:0, endAt:0, timer:null };
+
+    /* ========================================================
+       Renderizado de tarjetas de pregunta
+       ======================================================== */
+    /**
+     * Renderiza todas las tarjetas en el contenedor #list
+     * @param {Object} opts
+     * @param {boolean} opts.shuffleOptions - Mezcla las opciones dentro de cada tarjeta
+     * @param {boolean} opts.resetOrder - Regenera 'order' a 0..n-1
+     */
+    function render({ shuffleOptions=false, resetOrder=true } = {}){
+      if(resetOrder) order = EXAM.map((_,i)=>i);
+      $list.innerHTML = '';
+
       order.forEach((oi,vi)=>{
-        const it=EXAM[oi];
-        const opts=it.opts.map((t,i)=>({t,i})); if(shuffleOptions) shuffle(opts);
-        const card=document.createElement('div'); card.className='app__card'; card.dataset.viewIndex=vi; card.dataset.origIndex=oi;
-        card.innerHTML=`
+        const it   = EXAM[oi];
+        const opts = it.opts.map((t,i)=>({ t, i }));
+        if (shuffleOptions) shuffle(opts);
+
+        const card = document.createElement('div');
+        card.className = 'app__card';
+        card.dataset.viewIndex = String(vi);
+        card.dataset.origIndex = String(oi);
+
+        card.innerHTML = `
           <div class="app__card-head">
             <span class="app__card-tag">Pregunta ${vi+1}</span>
             <span class="app__card-tag">Opciones: 4</span>
           </div>
+
           <p class="app__card-title">${it.q}</p>
+
           <div class="app__card-options">
             ${opts.map((op,k)=>`
               <label class="app__card-option">
                 <input type="radio" name="q${vi}" value="${op.i}">
                 <div><strong>${L[k]}.</strong> ${op.t}</div>
-              </label>`).join('')}
+              </label>
+            `).join('')}
           </div>
+
           <div class="app__card-actions">
             <button class="app__btn app__btn--ok"  data-action="check">Comprobar</button>
             <button class="app__btn app__btn--warn" data-action="clear">Limpiar</button>
-            <span class="app__card-hint">Responde y comprueba para ver la explicación.</span>
+            <span class="app__card-hint">Responde y usa “Comprobar” para ver la explicación.</span>
           </div>
+
           <div class="app__card-feedback app__card-feedback--muted" aria-live="polite">Sin responder.</div>
-          <div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>`;
+          <div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>
+        `;
+
         $list.appendChild(card);
       });
-      answers=Array(EXAM.length).fill(null);
-      result =Array(EXAM.length).fill(null);
+
+      answers = Array(EXAM.length).fill(null);
+      result  = Array(EXAM.length).fill(null);
+
       updateStats();
     }
 
-    function checkCard(card,reveal=false){
-      const vi=Number(card.dataset.viewIndex), oi=Number(card.dataset.origIndex), it=EXAM[oi];
-      const sel=card.querySelector('input[type="radio"]:checked');
-      const fb=card.querySelector('.app__card-feedback'), exp=card.querySelector('.app__card-exp');
-      const boxes=[...card.querySelectorAll('.app__card-option')];
+    /**
+     * Corrige una tarjeta concreta (vi) y muestra feedback.
+     * @param {HTMLElement} card - Tarjeta .app__card
+     * @param {boolean} reveal - Forzar mostrar solución (final de examen)
+     */
+    function checkCard(card, reveal=false){
+      const vi  = Number(card.dataset.viewIndex);
+      const oi  = Number(card.dataset.origIndex);
+      const it  = EXAM[oi];
+      const sel = card.querySelector('input[type="radio"]:checked');
 
-      if(!sel){ fb.className='app__card-feedback app__card-feedback--bad'; fb.textContent='Elige una opción antes de comprobar.'; exp.style.display=reveal?'block':'none'; return; }
+      const fb  = card.querySelector('.app__card-feedback');
+      const exp = card.querySelector('.app__card-exp');
+      const boxes = [...card.querySelectorAll('.app__card-option')];
 
-      const chosen=Number(sel.value), ok=(chosen===it.ans); answers[vi]=chosen;
-      if(!mode.isExam||reveal) result[vi]=ok;
+      if(!sel){
+        fb.className = 'app__card-feedback app__card-feedback--bad';
+        fb.textContent = 'Elige una opción antes de comprobar.';
+        exp.style.display = reveal ? 'block' : 'none';
+        return;
+      }
 
+      const chosen = Number(sel.value);
+      const ok     = (chosen === it.ans);
+
+      answers[vi] = chosen;
+      if(!mode.isExam || reveal) result[vi] = ok;
+
+      // Limpia marcas anteriores
       boxes.forEach(b=>b.classList.remove('app__card-option--correct','app__card-option--wrong'));
       card.classList.remove('app__card--ok','app__card--bad');
 
-      boxes.forEach(b=>{ const v=Number(b.querySelector('input').value); if(v===it.ans&&(!mode.isExam||reveal)) b.classList.add('app__card-option--correct'); });
-      if(!ok&&(!mode.isExam||reveal)){ sel.closest('.app__card-option').classList.add('app__card-option--wrong'); }
-
-      if(!mode.isExam||reveal){
-        fb.className= ok ? 'app__card-feedback app__card-feedback--ok':'app__card-feedback app__card-feedback--bad';
-        fb.textContent= ok ? '¡Correcto!' : `Incorrecto. Respuesta correcta: "${it.opts[it.ans]}".`;
-        card.classList.add(ok?'app__card--ok':'app__card--bad');
-        exp.style.display='block';
-      }else{
-        fb.className='app__card-feedback app__card-feedback--muted';
-        fb.textContent='Respuesta registrada.'; exp.style.display='none';
+      // Marca la correcta (y la elegida errónea si procede)
+      boxes.forEach(b=>{
+        const v = Number(b.querySelector('input').value);
+        if(v === it.ans && (!mode.isExam || reveal)){
+          b.classList.add('app__card-option--correct');
+        }
+      });
+      if(!ok && (!mode.isExam || reveal)){
+        sel.closest('.app__card-option').classList.add('app__card-option--wrong');
       }
-      saveState(); updateStats();
+
+      // Feedback / explicación
+      if(!mode.isExam || reveal){
+        fb.className = ok ? 'app__card-feedback app__card-feedback--ok' : 'app__card-feedback app__card-feedback--bad';
+        fb.textContent = ok ? '¡Correcto!' : `Incorrecto. Respuesta correcta: "${it.opts[it.ans]}".`;
+        card.classList.add(ok ? 'app__card--ok' : 'app__card--bad');
+        exp.style.display = 'block';
+      }else{
+        fb.className = 'app__card-feedback app__card-feedback--muted';
+        fb.textContent = 'Respuesta registrada.';
+        exp.style.display = 'none';
+      }
+
+      saveState();
+      updateStats();
     }
 
+    /** Limpia una tarjeta (vi) a estado inicial */
     function clearCard(card){
-      const vi=Number(card.dataset.viewIndex);
-      [...card.querySelectorAll('input[type="radio"]')].forEach(i=>i.checked=false);
-      card.querySelectorAll('.app__card-option').forEach(b=>b.classList.remove('app__card-option--correct','app__card-option--wrong'));
+      const vi = Number(card.dataset.viewIndex);
+
+      [...card.querySelectorAll('input[type="radio"]')].forEach(i=> i.checked=false);
+      card.querySelectorAll('.app__card-option').forEach(b=> b.classList.remove('app__card-option--correct','app__card-option--wrong'));
       card.classList.remove('app__card--ok','app__card--bad');
-      const fb=card.querySelector('.app__card-feedback'); fb.className='app__card-feedback app__card-feedback--muted'; fb.textContent='Sin responder.';
-      card.querySelector('.app__card-exp').style.display='none';
-      answers[vi]=null; if(!mode.isExam) result[vi]=null;
-      saveState(); updateStats();
+
+      const fb = card.querySelector('.app__card-feedback');
+      fb.className = 'app__card-feedback app__card-feedback--muted';
+      fb.textContent = 'Sin responder.';
+
+      card.querySelector('.app__card-exp').style.display = 'none';
+
+      answers[vi] = null;
+      if(!mode.isExam) result[vi] = null;
+
+      saveState();
+      updateStats();
     }
 
-    /* =========================================================
-       Acciones globales
-       ========================================================= */
-    function updateStats(){ const ok=result.filter(v=>v===true).length; $pillS.textContent=`Aciertos: ${ok} / ${EXAM.length}`; $pillD.textContent=`Dataset: ${EXAM_FP===fp(DEFAULT_EXAM)?'por defecto':'personalizado'}`; }
-    function checkAll(){ $$('.app__card').forEach(c=>checkCard(c,mode.isExam)); saveState(); }
+    /** Actualiza contadores de estado (píldoras) */
+    function updateStats(){
+      const ok = result.filter(v=>v===true).length;
+      $pillS.textContent = `Aciertos: ${ok} / ${EXAM.length}`;
+      $pillD.textContent = `Dataset: ${EXAM_FP===fp(DEFAULT_EXAM) ? 'por defecto' : 'personalizado'}`;
+    }
+
+    /** Corrige todo (en repaso) o revela todo (al finalizar examen) */
+    function checkAll(){ $$('.app__card').forEach(c=>checkCard(c, mode.isExam)); saveState(); }
+
+    /** Limpia todas las tarjetas (respuestas y feedback) */
     function resetAll(){ $$('.app__card').forEach(clearCard); saveState(); }
-    function shuffleAll(){ order=shuffle(order); render({shuffleOptions:true, resetOrder:false}); saveState(); }
 
-    /* =========================================================
+    /** Mezcla el orden de preguntas visibles */
+    function shuffleAll(){ order = shuffle(order); render({ shuffleOptions:true, resetOrder:false }); saveState(); }
+
+    /* ========================================================
        Modo repaso/examen + temporizador
-       ========================================================= */
-    function setPracticeDisabled(dis){
-      $('#btn-shuffle').disabled=dis; $('#btn-check-all').disabled=dis; $('#btn-reset').disabled=dis;
-      $('#btn-load-file').disabled=dis; $('#btn-load-text').disabled=dis; $('#file-json').disabled=dis; $('#txt-json').disabled=dis;
-      $('#btn-import-csv').disabled=dis; $('#file-csv').disabled=dis;
+       ======================================================== */
+    function setPracticeDisabled(d){
+      // Desactiva acciones que no se deben usar mientras el examen está corriendo
+      $('#btn-shuffle').disabled   = d;
+      $('#btn-check-all').disabled = d;
+      $('#btn-reset').disabled     = d;
+
+      // Impedir cambiar dataset mientras corre el examen
+      $('#btn-load-file').disabled = d;
+      $('#btn-load-text').disabled = d;
+      $('#file-json').disabled     = d;
+      $('#txt-json').disabled      = d;
+
+      // CSV
+      $('#btn-import-csv').disabled= d;
+      $('#file-csv').disabled      = d;
     }
+
     function startExam(){
       if(mode.running) return;
-      mode.isExam=true; mode.running=true; mode.finished=false;
-      const mins=Math.max(1,Math.min(300,parseInt($('#inp-minutes').value||'20',10)));
-      const doShuffle=$('#chk-shuffle').checked;
-      render({shuffleOptions:doShuffle, resetOrder:true});
-      $root.classList.add('app--exam'); $root.classList.remove('app--finished');
-      mode.durationMs=mins*60000; mode.endAt=now()+mode.durationMs;
-      startTimer(); setPracticeDisabled(true); saveState();
+
+      mode.isExam   = true;
+      mode.running  = true;
+      mode.finished = false;
+
+      const mins = Math.max(1, Math.min(300, parseInt($('#inp-minutes').value || '20', 10)));
+      const doShuffle = $('#chk-shuffle').checked;
+
+      render({ shuffleOptions:doShuffle, resetOrder:true });
+
+      $root.classList.add('app--exam');
+      $root.classList.remove('app--finished');
+
+      mode.durationMs = mins * 60000;
+      mode.endAt      = now() + mode.durationMs;
+
+      startTimer();
+      setPracticeDisabled(true);
+      saveState();
     }
+
     function finishExam(){
       if(!mode.isExam) return;
-      mode.running=false; mode.finished=true; stopTimer();
-      $$('.app__card').forEach(c=>checkCard(c,true));
-      $$('.app__card input[type="radio"]').forEach(i=>i.disabled=true);
-      $root.classList.add('app--finished'); setPracticeDisabled(false); saveState(); updateStats();
-    }
-    function resetMode(){
-      stopTimer(); mode={isExam:false,running:false,finished:false,durationMs:0,endAt:0,timer:null};
-      $root.classList.remove('app--exam','app--finished'); render({shuffleOptions:false, resetOrder:true});
-      setPracticeDisabled(false); saveState();
-    }
-    function startTimer(){
-      updateTimer(); mode.timer=setInterval(()=>{
-        if(!mode.running){ stopTimer(); return; }
-        if(mode.endAt<=now()) finishExam(); else updateTimer();
-      },500);
-    }
-    function stopTimer(){ if(mode.timer){ clearInterval(mode.timer); mode.timer=null; } updateTimer(); }
-    function updateTimer(){ const left=Math.max(0,mode.endAt-now()); $pillT.textContent=fmt(left); }
 
-    /* =========================================================
+      mode.running  = false;
+      mode.finished = true;
+
+      stopTimer();
+
+      // Muestra soluciones y bloquea inputs
+      $$('.app__card').forEach(c=> checkCard(c, true));
+      $$('.app__card input[type="radio"]').forEach(i=> i.disabled = true);
+
+      $root.classList.add('app--finished');
+      setPracticeDisabled(false);
+      saveState();
+      updateStats();
+    }
+
+    function resetMode(){
+      stopTimer();
+      mode = { isExam:false, running:false, finished:false, durationMs:0, endAt:0, timer:null };
+      $root.classList.remove('app--exam','app--finished');
+      render({ shuffleOptions:false, resetOrder:true });
+      setPracticeDisabled(false);
+      saveState();
+    }
+
+    function startTimer(){
+      updateTimerUI();
+      mode.timer = setInterval(()=>{
+        if(!mode.running){ stopTimer(); return; }
+        if(mode.endAt <= now()){ finishExam(); }
+        else { updateTimerUI(); }
+      }, 500);
+    }
+
+    function stopTimer(){
+      if(mode.timer){ clearInterval(mode.timer); mode.timer=null; }
+      updateTimerUI();
+    }
+
+    function updateTimerUI(){
+      const left = Math.max(0, mode.endAt - now());
+      $pillT.textContent = fmt(left);
+    }
+
+    /* ========================================================
        Persistencia (localStorage)
-       ========================================================= */
-    function saveData(){ try{ localStorage.setItem(KEY.data, JSON.stringify({fp:EXAM_FP, exam:EXAM})); }catch{} }
-    function loadData(){ try{ const raw=localStorage.getItem(KEY.data); if(!raw) return null; const o=JSON.parse(raw); return Array.isArray(o?.exam)?o:null; }catch{return null} }
+       ======================================================== */
+    function saveData(){
+      // Guarda el dataset activo
+      try{ localStorage.setItem(KEY.data, JSON.stringify({ fp:EXAM_FP, exam:EXAM })); }catch{}
+    }
+
+    function loadData(){
+      // Carga dataset si existe
+      try{
+        const raw = localStorage.getItem(KEY.data);
+        if(!raw) return null;
+        const o = JSON.parse(raw);
+        return Array.isArray(o?.exam) ? o : null;
+      }catch{ return null; }
+    }
+
     function saveState(){
+      // Guarda estado de orden, respuestas, modo, etiquetas
       try{
         localStorage.setItem(KEY.state, JSON.stringify({
           fp:EXAM_FP, order, answers, result,
-          mode:{isExam:mode.isExam,running:mode.running,finished:mode.finished,durationMs:mode.durationMs,endAt:mode.endAt},
+          mode:{ isExam:mode.isExam, running:mode.running, finished:mode.finished, durationMs:mode.durationMs, endAt:mode.endAt },
           labels:labelsMode
         }));
       }catch{}
     }
-    function loadState(){
-      try{
-        const raw=localStorage.getItem(KEY.state); if(!raw) return false;
-        const o=JSON.parse(raw); if(!o||o.fp!==EXAM_FP) return false;
-        if(o.labels){ labelsMode=o.labels; applyLabels(); }
-        order  = Array.isArray(o.order)&&o.order.length===EXAM.length? o.order.slice(): EXAM.map((_,i)=>i);
-        answers= Array.isArray(o.answers)? o.answers.slice(): Array(EXAM.length).fill(null);
-        result = Array.isArray(o.result) ? o.result.slice() : Array(EXAM.length).fill(null);
 
-        // Render respetando orden (sin barajar)
-        $list.innerHTML='';
+    function loadState(){
+      // Reconstruye interfaz a partir del estado guardado (si coincide la huella del dataset)
+      try{
+        const raw = localStorage.getItem(KEY.state);
+        if(!raw) return false;
+
+        const o = JSON.parse(raw);
+        if(!o || o.fp !== EXAM_FP) return false; // Dataset cambió
+
+        if(o.labels){ labelsMode = o.labels; applyLabels(); }
+
+        order   = Array.isArray(o.order)   && o.order.length===EXAM.length ? o.order.slice()   : EXAM.map((_,i)=>i);
+        answers = Array.isArray(o.answers) ? o.answers.slice() : Array(EXAM.length).fill(null);
+        result  = Array.isArray(o.result)  ? o.result.slice()  : Array(EXAM.length).fill(null);
+
+        // Render sin barajar (respetando 'order')
+        $list.innerHTML = '';
         order.forEach((oi,vi)=>{
-          const it=EXAM[oi];
-          const card=document.createElement('div'); card.className='app__card'; card.dataset.viewIndex=vi; card.dataset.origIndex=oi;
-          const opts=it.opts.map((t,i)=>({t,i}));
-          card.innerHTML=`
+          const it = EXAM[oi];
+          const card = document.createElement('div');
+          card.className = 'app__card';
+          card.dataset.viewIndex = String(vi);
+          card.dataset.origIndex = String(oi);
+
+          const opts = it.opts.map((t,i)=>({t,i}));
+
+          card.innerHTML = `
             <div class="app__card-head">
               <span class="app__card-tag">Pregunta ${vi+1}</span>
               <span class="app__card-tag">Opciones: 4</span>
             </div>
             <p class="app__card-title">${it.q}</p>
             <div class="app__card-options">
-              ${opts.map((op,k)=>`<label class="app__card-option"><input type="radio" name="q${vi}" value="${op.i}"><div><strong>${L[k]}.</strong> ${op.t}</div></label>`).join('')}
+              ${opts.map((op,k)=>`
+                <label class="app__card-option">
+                  <input type="radio" name="q${vi}" value="${op.i}">
+                  <div><strong>${L[k]}.</strong> ${op.t}</div>
+                </label>
+              `).join('')}
             </div>
             <div class="app__card-actions">
               <button class="app__btn app__btn--ok" data-action="check">Comprobar</button>
@@ -410,192 +748,338 @@
               <span class="app__card-hint">Responde y comprueba.</span>
             </div>
             <div class="app__card-feedback app__card-feedback--muted" aria-live="polite">Sin responder.</div>
-            <div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>`;
+            <div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>
+          `;
+
           $list.appendChild(card);
         });
 
-        answers.forEach((v,i)=>{ if(v!==null){ const inp=document.querySelector(`.app__card[data-view-index="${i}"] input[value="${v}"]`); if(inp) inp.checked=true; } });
+        // Restaura selecciones
+        answers.forEach((v,vi)=>{
+          if(v!==null){
+            const input = document.querySelector(`.app__card[data-view-index="${vi}"] input[value="${v}"]`);
+            if(input) input.checked = true;
+          }
+        });
 
-        // Restaura modo
+        // Restaura modo y, si procede, temporizador o soluciones
         if(o.mode){
-          mode.isExam=!!o.mode.isExam; mode.running=!!o.mode.running; mode.finished=!!o.mode.finished;
-          mode.durationMs=o.mode.durationMs||0; mode.endAt=o.mode.endAt||0;
+          mode.isExam   = !!o.mode.isExam;
+          mode.running  = !!o.mode.running;
+          mode.finished = !!o.mode.finished;
+          mode.durationMs = o.mode.durationMs || 0;
+          mode.endAt      = o.mode.endAt || 0;
+
           if(mode.isExam){
-            $root.classList.add('app--exam'); setPracticeDisabled(mode.running);
+            $root.classList.add('app--exam');
+            setPracticeDisabled(mode.running);
+
             if(mode.finished){
               $$('.app__card').forEach(c=>checkCard(c,true));
-              $$('.app__card input[type="radio"]').forEach(i=>i.disabled=true);
+              $$('.app__card input[type="radio"]').forEach(i=> i.disabled = true);
               $root.classList.add('app--finished');
             }else if(mode.running){
-              if(mode.endAt<=now()) finishExam(); else startTimer();
+              if(mode.endAt <= now()) finishExam();
+              else startTimer();
             }
           }else{
-            result.forEach((r,i)=>{ if(r!==null){ const card=document.querySelector(`.app__card[data-view-index="${i}"]`); if(card) checkCard(card,true); } });
+            // Repaso: si ya había corrección, muéstrala
+            result.forEach((r,vi)=>{
+              if(r!==null){
+                const card = document.querySelector(`.app__card[data-view-index="${vi}"]`);
+                if(card) checkCard(card,true);
+              }
+            });
           }
         }
-        updateStats(); return true;
-      }catch{ return false; }
-    }
-    function clearAll(){ try{ localStorage.removeItem(KEY.state); localStorage.removeItem(KEY.data); localStorage.removeItem(KEY.labels); }catch{} }
 
-    /* =========================================================
-       Importar JSON (archivo/pegado)
-       ========================================================= */
+        updateStats();
+        return true;
+      }catch{
+        return false;
+      }
+    }
+
+    function clearAll(){
+      try{
+        localStorage.removeItem(KEY.state);
+        localStorage.removeItem(KEY.data);
+        localStorage.removeItem(KEY.labels);
+      }catch{}
+    }
+
+    /* ========================================================
+       Importar JSON (archivo/pegado) y fijarlo como dataset
+       ======================================================== */
     function validateJSON(arr){
       if(!Array.isArray(arr)) return 'El JSON debe ser un arreglo.';
       for(let i=0;i<arr.length;i++){
-        const x=arr[i];
-        if(!x||typeof x.q!=='string'||!Array.isArray(x.opts)||x.opts.length!==4||typeof x.ans!=='number'||typeof x.exp!=='string')
+        const x = arr[i];
+        if(!x || typeof x.q!=='string' || !Array.isArray(x.opts) || x.opts.length!==4 || typeof x.ans!=='number' || typeof x.exp!=='string'){
           return `Ítem ${i+1} inválido. Requiere {q, opts[4], ans(0–3), exp}.`;
+        }
       }
       return null;
     }
+
     function readJSONFile(file){
-      return new Promise((res,rej)=>{
-        const r=new FileReader();
-        r.onload=()=>{ try{ res(JSON.parse(String(r.result))); }catch(e){ rej(e);} };
-        r.onerror=()=> rej(r.error||new Error('No se pudo leer el archivo.'));
+      return new Promise((resolve, reject)=>{
+        const r = new FileReader();
+        r.onload  = ()=>{ try{ resolve(JSON.parse(String(r.result))); }catch(e){ reject(e); } };
+        r.onerror = ()=> reject(r.error || new Error('No se pudo leer el archivo.'));
         r.readAsText(file,'utf-8');
       });
     }
-    function setDataset(newExam,label='personalizado'){
-      EXAM=newExam; EXAM_FP=fp(EXAM); $pillD.textContent=`Dataset: ${label}`;
-      resetMode(); saveData(); saveState();
+
+    function setDataset(newExam, label='personalizado'){
+      EXAM    = newExam;
+      EXAM_FP = fp(EXAM);
+      $pillD.textContent = `Dataset: ${label}`;
+      resetMode();       // Limpia estados del modo y re-renderiza
+      saveData();       // Guarda el banco
+      saveState();      // Guarda estado general
     }
 
-    /* =========================================================
-       Exportar/Importar CSV (calificar)
-       ========================================================= */
+    /* ========================================================
+       Exportar / Importar CSV (calificar respuestas)
+       ======================================================== */
     function exportCSV(){
-      const rows=[['#','Pregunta','Elegida (letra)','Elegida (texto)','Correcta (letra)','Correcta (texto)','¿Correcta?','¿Corregida?'].join(',')];
-      $$('.app__card').forEach((card,i)=>{
-        const oi=Number(card.dataset.origIndex), it=EXAM[oi], map={};
+      const rows = [];
+      rows.push([
+        '#','Pregunta','Elegida (letra)','Elegida (texto)',
+        'Correcta (letra)','Correcta (texto)','¿Correcta?','¿Corregida?'
+      ].join(','));
+
+      $$('.app__card').forEach((card,vi)=>{
+        const oi = Number(card.dataset.origIndex);
+        const it = EXAM[oi];
+
+        // Mapa índice original -> letra/texto según DOM actual
+        const map = {};
         [...card.querySelectorAll('.app__card-option')].forEach((box,k)=>{
-          const idx=Number(box.querySelector('input').value);
-          const txt=box.querySelector('div').innerText.replace(/^[A-D]\.\s*/, '');
-          map[idx]={letter:L[k], text:txt};
+          const idx = Number(box.querySelector('input').value);
+          const txt = box.querySelector('div').innerText.replace(/^[A-D]\.\s*/, '');
+          map[idx]  = { letter:L[k], text:txt };
         });
-        const chosen=answers[i];
-        const ch=chosen===null?{letter:'',text:''}:(map[chosen]||{letter:'',text:''});
-        const co=map[it.ans]||{letter:'',text:it.opts[it.ans]||''};
-        const ok=result[i], ev=result[i]!==null;
-        rows.push([ i+1, `"${it.q.replace(/"/g,'""')}"`, ch.letter, `"${(ch.text||'').replace(/"/g,'""')}"`, co.letter, `"${(co.text||'').replace(/"/g,'""')}"`, ok===true?'Sí':(ok===false?'No':''), ev?'Sí':'No' ].join(','));
+
+        const chosen = answers[vi];
+        const chInfo = chosen===null ? {letter:'', text:''} : (map[chosen] || {letter:'', text:''});
+
+        const coIdx  = it.ans;
+        const coInfo = map[coIdx] || {letter:'', text: it.opts[coIdx] || ''};
+
+        const ok = result[vi];
+        const ev = result[vi] !== null;
+
+        rows.push([
+          vi+1,
+          `"${it.q.replace(/"/g,'""')}"`,
+          chInfo.letter,
+          `"${(chInfo.text||'').replace(/"/g,'""')}"`,
+          coInfo.letter,
+          `"${(coInfo.text||'').replace(/"/g,'""')}"`,
+          ok===true ? 'Sí' : (ok===false ? 'No' : ''),
+          ev ? 'Sí' : 'No'
+        ].join(','));
       });
-      const ts=new Date().toISOString().replace(/[:T]/g,'-').split('.')[0];
+
+      const ts = new Date().toISOString().replace(/[:T]/g,'-').split('.')[0];
       download(`examen_${ts}.csv`, rows.join('\n'));
     }
 
     function parseCSV(text){
+      // Parser simple de CSV con comillas
       const rows=[]; let row=[], cell='', q=false;
       for(let i=0;i<text.length;i++){
         const ch=text[i], nx=text[i+1];
-        if(q){ if(ch==='"'&&nx==='"'){cell+='"';i++;} else if(ch==='"'){q=false;} else cell+=ch; }
-        else{ if(ch==='"'){q=true;} else if(ch===','){row.push(cell);cell='';} else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';} else if(ch!=='\r'){cell+=ch;} }
+        if(q){
+          if(ch==='"'&&nx==='"'){ cell+='"'; i++; }
+          else if(ch==='"'){ q=false; }
+          else cell+=ch;
+        }else{
+          if(ch==='"'){ q=true; }
+          else if(ch===','){ row.push(cell); cell=''; }
+          else if(ch==='\n'){ row.push(cell); rows.push(row); row=[]; cell=''; }
+          else if(ch!=='\r'){ cell+=ch; }
+        }
       }
-      if(cell.length||row.length){row.push(cell);rows.push(row);} return rows;
-    }
-    function summarizeCSV(text){
-      $panelCSV.style.display='block'; $sumCSV.innerHTML='';
-      const rows=parseCSV(text.trim()); if(!rows.length){ $sumCSV.textContent='CSV vacío.'; return; }
-      const header=rows[0].map(h=>h.trim().toLowerCase()), data=rows.slice(1);
-      const iCh=header.findIndex(h=>h.includes('elegida')&&h.includes('letra'));
-      const iCo=header.findIndex(h=>h.includes('correcta')&&h.includes('letra'));
-      let total=0,correct=0,answered=0, fails=[];
-      if(iCh!==-1&&iCo!==-1){
-        data.forEach((r,i)=>{ const ch=(r[iCh]||'').trim().toUpperCase(), co=(r[iCo]||'').trim().toUpperCase();
-          if(['A','B','C','D'].includes(ch)) answered++;
-          if(ch&&co&&ch===co) correct++; total++; if(ch&&co&&ch!==co) fails.push({n:i+1,ch,co});
-        });
-        $sumCSV.innerHTML=`<p><strong>Formato:</strong> CSV exportado.</p>
-          <p><strong>Preguntas:</strong> ${total} | <strong>Respondidas:</strong> ${answered} | <strong>Aciertos:</strong> ${correct} | <strong>Nota:</strong> ${((correct/Math.max(1,total))*10).toFixed(2)}/10</p>
-          ${fails.length?`<details><summary>Fallos (${fails.length})</summary><ul>${fails.map(m=>`<li>Preg. ${m.n}: marcó ${m.ch}, correcta ${m.co}</li>`).join('')}</ul></details>`:'<p>Sin fallos 🎉</p>'}`;
-        return;
-      }
-      const toks=text.toUpperCase().match(/[A-D]/g)||[];
-      total=EXAM.length; if(!toks.length){ $sumCSV.innerHTML='<p>No se detectaron respuestas (A–D).</p>'; return; }
-      toks.slice(0,total).forEach((ch,i)=>{ const oi=order[i], co=L[EXAM[oi].ans]; if(ch===co) correct++; else fails.push({n:i+1,ch,co}); });
-      answered=Math.min(toks.length,total);
-      $sumCSV.innerHTML=`<p><strong>Formato:</strong> lista simple (A–D).</p>
-        <p><em>Ojo:</em> califica según el <strong>orden visible</strong>.</p>
-        <p><strong>Preguntas:</strong> ${total} | <strong>Respondidas:</strong> ${answered} | <strong> Aciertos:</strong> ${correct} | <strong>Nota:</strong> ${((correct/Math.max(1,total))*10).toFixed(2)}/10</p>
-        ${fails.length?`<details open><summary>Fallos (${fails.length})</summary><ul>${fails.map(m=>`<li>Preg. ${m.n}: marcó ${m.ch}, correcta ${m.co}</li>`).join('')}</ul></details>`:'<p>Sin fallos 🎉</p>'}`;
+      if(cell.length || row.length){ row.push(cell); rows.push(row); }
+      return rows;
     }
 
-    /* =========================================================
-       Etiquetas examen/repaso (UI)
-       ========================================================= */
+    function summarizeCSV(text){
+      // Muestra resumen de calificación a partir de un CSV exportado o una lista A–D
+      $panelCSV.style.display='block';
+      $sumCSV.innerHTML='';
+
+      const rows = parseCSV(text.trim());
+      if(!rows.length){ $sumCSV.textContent='CSV vacío.'; return; }
+
+      const header = rows[0].map(h=>h.trim().toLowerCase());
+      const data   = rows.slice(1);
+
+      const iCh = header.findIndex(h=>h.includes('elegida')  && h.includes('letra'));
+      const iCo = header.findIndex(h=>h.includes('correcta') && h.includes('letra'));
+
+      let total=0, correct=0, answered=0;
+      const fails=[];
+
+      // Formato 1: CSV exportado por la app (tiene columnas de letras)
+      if(iCh!==-1 && iCo!==-1){
+        data.forEach((r,i)=>{
+          const ch=(r[iCh]||'').trim().toUpperCase();
+          const co=(r[iCo]||'').trim().toUpperCase();
+          if(['A','B','C','D'].includes(ch)) answered++;
+          if(ch && co && ch===co) correct++;
+          total++;
+          if(ch && co && ch!==co) fails.push({ n:i+1, ch, co });
+        });
+
+        $sumCSV.innerHTML = `
+          <p><strong>Formato:</strong> CSV exportado.</p>
+          <p><strong>Preguntas:</strong> ${total} · <strong>Respondidas:</strong> ${answered} · <strong>Aciertos:</strong> ${correct} · <strong>Nota:</strong> ${((correct/Math.max(1,total))*10).toFixed(2)}/10</p>
+          ${fails.length ? `<details><summary>Fallos (${fails.length})</summary><ul>${fails.map(m=>`<li>Preg. ${m.n}: marcó ${m.ch}, correcta ${m.co}</li>`).join('')}</ul></details>` : '<p>Sin fallos 🎉</p>'}
+        `;
+        return;
+      }
+
+      // Formato 2: lista simple A–D (por línea/espacios/comas)
+      const tokens = text.toUpperCase().match(/[A-D]/g) || [];
+      total = EXAM.length;
+
+      if(!tokens.length){
+        $sumCSV.innerHTML = `
+          <p>No se detectaron respuestas (A–D).</p>
+          <ul>
+            <li>Importa el CSV exportado por la app</li>
+            <li>O pega una lista simple de letras (A–D)</li>
+          </ul>
+        `;
+        return;
+      }
+
+      tokens.slice(0,total).forEach((ch,i)=>{
+        const oi  = order[i];
+        const coL = L[EXAM[oi].ans];
+        if(ch===coL) correct++; else fails.push({ n:i+1, ch, co:coL });
+      });
+
+      answered = Math.min(tokens.length,total);
+      $sumCSV.innerHTML = `
+        <p><strong>Formato:</strong> lista simple (A–D).</p>
+        <p><em>Ojo:</em> califica según el <strong>orden visible</strong>.</p>
+        <p><strong>Preguntas:</strong> ${total} · <strong>Respondidas:</strong> ${answered} · <strong>Aciertos:</strong> ${correct} · <strong>Nota:</strong> ${((correct/Math.max(1,total))*10).toFixed(2)}/10</p>
+        ${fails.length ? `<details open><summary>Fallos (${fails.length})</summary><ul>${fails.map(m=>`<li>Preg. ${m.n}: marcó ${m.ch}, correcta ${m.co}</li>`).join('')}</ul></details>` : '<p>Sin fallos 🎉</p>'}
+      `;
+    }
+
+    /* ========================================================
+       Etiquetas examen/repaso (solo textos UI)
+       ======================================================== */
     function applyLabels(){
-      const repaso=(labelsMode==='repaso');
+      const repaso = (labelsMode==='repaso');
       $txtModeSummary.textContent = repaso ? 'Modo repaso' : 'Modo examen';
       $txtModeHint.textContent    = repaso ? 'Feedback inmediato con “Comprobar”.' : 'Sin feedback hasta “Finalizar”.';
       $('#btn-start').textContent     = repaso ? 'Iniciar repaso'   : 'Iniciar examen';
       $('#btn-finish').textContent    = repaso ? 'Finalizar repaso' : 'Finalizar examen';
       $('#btn-resetmode').textContent = repaso ? 'Reiniciar modo repaso' : 'Reiniciar modo examen';
-      $txtSubtitle.textContent   = repaso ? 'Importar JSON/CSV, catálogo en la nube, modo repaso/examen, exportar CSV.' :
-                                            'Importar JSON/CSV, catálogo en la nube, modo repaso/examen, exportar CSV.';
+      $txtSubtitle.textContent        = 'Catálogo en la nube · Importar JSON/CSV · Modo repaso/examen · Exportar CSV';
       localStorage.setItem(KEY.labels, labelsMode);
     }
-    function swapLabels(){ labelsMode=(labelsMode==='examen'?'repaso':'examen'); applyLabels(); }
+    function swapLabels(){ labelsMode = (labelsMode==='examen' ? 'repaso' : 'examen'); applyLabels(); }
 
-    /* =========================================================
-       Catálogo de materias (MATERIAS/catalog.json)
-       ========================================================= */
+    /* ========================================================
+       Catálogo (MATERIAS/catalog.json)
+       ======================================================== */
     async function fetchCatalog(){
-      const res = await fetch('MATERIAS/catalog.json', { cache: 'no-store' });
+      // cache: 'no-store' evita que Safari muestre una versión cacheada
+      const res = await fetch('MATERIAS/catalog.json', { cache:'no-store' });
       if(!res.ok) throw new Error(`No se pudo cargar catalog.json (${res.status})`);
       return await res.json();
     }
+
     function populateCatalog(items){
-      const sel = document.getElementById('catalog-select');
+      const sel = $('#catalog-select');
       sel.innerHTML = '';
+
       if(!Array.isArray(items) || !items.length){
-        const opt=document.createElement('option'); opt.value=''; opt.textContent='No hay materias en el catálogo';
-        sel.appendChild(opt); return;
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No hay materias en el catálogo';
+        sel.appendChild(opt);
+        return;
       }
+
       items.forEach(item=>{
-        const opt=document.createElement('option');
-        opt.value=item.file; opt.textContent=item.title||item.id||item.file;
+        const opt = document.createElement('option');
+        opt.value = item.file;                         // p.ej., "MATERIAS/economia.json"
+        opt.textContent = item.title || item.id || item.file;
         sel.appendChild(opt);
       });
     }
+
     async function loadCatalogIntoSelect(){
-      try{ const catalog=await fetchCatalog(); populateCatalog(catalog); }
-      catch(e){ console.warn(e); const sel=document.getElementById('catalog-select'); sel.innerHTML=''; const opt=document.createElement('option'); opt.value=''; opt.textContent='Error al leer catalog.json'; sel.appendChild(opt); }
-    }
-    async function loadSelectedDataset(){
-      const sel=document.getElementById('catalog-select'); const file=sel.value;
-      if(!file){ alert('No hay materia seleccionada.'); return; }
       try{
-        const res=await fetch(file, { cache: 'no-store' });
+        const catalog = await fetchCatalog();
+        populateCatalog(catalog);
+      }catch(e){
+        console.warn(e);
+        const sel = $('#catalog-select');
+        sel.innerHTML = '';
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Error al leer catalog.json';
+        sel.appendChild(opt);
+      }
+    }
+
+    async function loadSelectedDataset(){
+      const sel  = $('#catalog-select');
+      const file = sel.value;
+      if(!file){ alert('No hay materia seleccionada.'); return; }
+
+      try{
+        const res = await fetch(file, { cache:'no-store' });
         if(!res.ok) throw new Error(`No se pudo cargar ${file} (${res.status})`);
-        const json=await res.json();
+        const json = await res.json();
         setDataset(json, file.replace(/^MATERIAS\//,''));
         alert('Materia cargada: ' + file);
-      }catch(e){ alert('Error al cargar el banco: ' + e.message); }
+      }catch(e){
+        alert('Error al cargar el banco: ' + e.message);
+      }
     }
 
-    /* =========================================================
-       Eventos
-       ========================================================= */
+    /* ========================================================
+       Enlace de eventos y arranque
+       ======================================================== */
     document.addEventListener('DOMContentLoaded', ()=>{
-      // Dataset guardado o por defecto
-      const saved=loadData();
-      if(saved){ EXAM=saved.exam; EXAM_FP=fp(EXAM); $pillD.textContent='Dataset: restaurado'; }
-      else     { EXAM=DEFAULT_EXAM; EXAM_FP=fp(EXAM); $pillD.textContent='Dataset: por defecto'; }
+      // Carga dataset guardado o el de muestra
+      const saved = loadData();
+      if(saved){ EXAM = saved.exam; EXAM_FP = fp(EXAM); $pillD.textContent='Dataset: restaurado'; }
+      else     { EXAM = DEFAULT_EXAM; EXAM_FP = fp(EXAM); $pillD.textContent='Dataset: por defecto'; }
 
-      applyLabels(); render({shuffleOptions:false, resetOrder:true}); loadState();
+      // Aplica etiquetas, renderiza y restaura estado si coincide la huella
+      applyLabels();
+      render({ shuffleOptions:false, resetOrder:true });
+      loadState();
 
-      // Delegación tarjetas
-      $list.addEventListener('click', e=>{
-        const btn=e.target.closest('button'); if(!btn) return;
-        const card=e.target.closest('.app__card'); if(!card) return;
-        if(btn.dataset.action==='check') checkCard(card);
-        if(btn.dataset.action==='clear') clearCard(card);
+      // Delegación para botones de cada tarjeta
+      $list.addEventListener('click', (e)=>{
+        const btn  = e.target.closest('button');
+        const card = e.target.closest('.app__card');
+        if(!btn || !card) return;
+        if(btn.dataset.action === 'check') checkCard(card);
+        if(btn.dataset.action === 'clear') clearCard(card);
       });
-      $list.addEventListener('change', e=>{
-        const inp=e.target.closest('input[type="radio"]'); if(!inp) return;
-        const card=e.target.closest('.app__card'); const vi=Number(card.dataset.viewIndex);
-        answers[vi]=Number(inp.value); saveState();
+
+      // Guardar elección al cambiar
+      $list.addEventListener('change', (e)=>{
+        const inp  = e.target.closest('input[type="radio"]');
+        const card = e.target.closest('.app__card');
+        if(!inp || !card) return;
+        const vi = Number(card.dataset.viewIndex);
+        answers[vi] = Number(inp.value);
+        saveState();
       });
 
       // Toolbar
@@ -603,39 +1087,59 @@
       $('#btn-check-all').addEventListener('click', checkAll);
       $('#btn-reset').addEventListener('click', resetAll);
       $('#btn-export').addEventListener('click', exportCSV);
-      $('#btn-clear').addEventListener('click', ()=>{ if(confirm('¿Borrar estado y dataset guardados?')){ try{localStorage.removeItem(KEY.state);localStorage.removeItem(KEY.data);localStorage.removeItem(KEY.labels);}catch{} location.reload(); } });
+      $('#btn-clear').addEventListener('click', ()=>{
+        if(confirm('¿Borrar estado y dataset guardados?')){
+          clearAll(); location.reload();
+        }
+      });
       $('#btn-swap-label').addEventListener('click', swapLabels);
 
-      // JSON
+      // Importar JSON (archivo/pegado)
       $('#btn-load-file').addEventListener('click', async ()=>{
-        const f=$('#file-json').files?.[0]; if(!f) return alert('Selecciona un archivo JSON.');
-        try{ const json=await readJSONFile(f); const err=validateJSON(json); if(err) throw new Error(err); setDataset(json, f.name||'archivo'); alert('Dataset cargado.'); }catch(e){ alert('Error: '+e.message); }
-      });
-      $('#btn-load-text').addEventListener('click', ()=>{
-        const raw=$('#txt-json').value.trim(); if(!raw) return alert('Pega JSON en el cuadro.');
-        try{ const json=JSON.parse(raw); const err=validateJSON(json); if(err) throw new Error(err); setDataset(json,'pegado'); alert('Dataset cargado.'); }catch(e){ alert('JSON inválido: '+e.message); }
+        const f = $('#file-json').files?.[0];
+        if(!f) return alert('Selecciona un archivo JSON.');
+        try{
+          const json = await readJSONFile(f);
+          const err  = validateJSON(json);
+          if(err) throw new Error(err);
+          setDataset(json, f.name || 'archivo');
+          alert('Dataset cargado.');
+        }catch(e){ alert('Error: '+e.message); }
       });
 
-      // Modo
+      $('#btn-load-text').addEventListener('click', ()=>{
+        const raw = $('#txt-json').value.trim();
+        if(!raw) return alert('Pega JSON en el cuadro.');
+        try{
+          const json = JSON.parse(raw);
+          const err  = validateJSON(json);
+          if(err) throw new Error(err);
+          setDataset(json,'pegado');
+          alert('Dataset cargado.');
+        }catch(e){ alert('JSON inválido: '+e.message); }
+      });
+
+      // Modo examen/repaso
       $('#btn-start').addEventListener('click', startExam);
       $('#btn-finish').addEventListener('click', finishExam);
       $('#btn-resetmode').addEventListener('click', resetMode);
 
-      // CSV
-      const fileCSV=$('#file-csv');
+      // CSV (import)
+      const fileCSV = $('#file-csv');
       $('#btn-import-csv').addEventListener('click', ()=>{ fileCSV.value=''; fileCSV.click(); });
       fileCSV.addEventListener('change', ()=>{
-        const f=fileCSV.files&&fileCSV.files[0]; if(!f) return;
-        const r=new FileReader();
-        r.onload = ()=> summarizeCSV(String(r.result||'')); 
-        r.onerror= ()=> alert('No se pudo leer el CSV.');
+        const f = fileCSV.files && fileCSV.files[0];
+        if(!f) return;
+        const r = new FileReader();
+        r.onload  = ()=> summarizeCSV(String(r.result || ''));
+        r.onerror = ()=> alert('No se pudo leer el CSV.');
         r.readAsText(f,'utf-8');
       });
 
       // Catálogo
       $('#btn-reload-catalog').addEventListener('click', loadCatalogIntoSelect);
       $('#btn-load-catalog').addEventListener('click', loadSelectedDataset);
-      loadCatalogIntoSelect(); // cargar al inicio
+      loadCatalogIntoSelect(); // lee MATERIAS/catalog.json al inicio
     });
   })();
   </script>
