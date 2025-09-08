@@ -4,4 +4,5 @@
 { "id": "historia", "title": "Historia Contemporánea", "file": "MATERIAS/historia.json" },
 { "id": "lengua", "title": "Lengua Castellana", "file": "MATERIAS/lengua.json" },
 { "id": "mates", "title": "Matemáticas Sociales","file": "MATERIAS/matematica_sociale.json" }
+{ "id": "ingles", "title": "Inglés (GS)", "file": "MATERIAS/ingles.json" }
 ]
