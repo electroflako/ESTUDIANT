@@ -1,8 +1,32 @@
 [
-  { "id": "economia",  "title": "Economía",               "file": "MATERIAS/economia.json" },
-  { "id": "geografia", "title": "Geografía",              "file": "MATERIAS/geografia.json" },
-  { "id": "historia",  "title": "Historia Contemporanea", "file": "MATERIAS/historia.json" },
-  { "id": "lengua",    "title": "Lengua Castellana",      "file": "MATERIAS/lengua.json" },
-  { "id": "mates",     "title": "Matemáticas Sociales",   "file": "MATERIAS/mates.json" },
-  { "id": "ingles",    "title": "Inglés",            "file": "MATERIAS/ingles.json" }
+    {
+        "id": "economia",
+        "title": "Economía",
+        "file": "MATERIAS/economia.json"
+    },
+    {
+        "id": "geografia",
+        "title": "Geografía",
+        "file": "MATERIAS/geografia.json"
+    },
+    {
+        "id": "historia",
+        "title": "Historia Contemporanea",
+        "file": "MATERIAS/historia.json"
+    },
+    {
+        "id": "lengua",
+        "title": "Lengua Castellana",
+        "file": "MATERIAS/lengua.json"
+    },
+    {
+        "id": "mates",
+        "title": "Matemáticas Sociales",
+        "file": "MATERIAS/mates.json"
+    },
+    {
+        "id": "ingles",
+        "title": "Inglés",
+        "file": "MATERIAS/ingles.json"
+    }
 ]
