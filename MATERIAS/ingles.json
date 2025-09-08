@@ -1,0 +1,122 @@
+[
+  {
+    "q": "Choose the correct option: I __________ to London twice.",
+    "opts": ["have been", "was", "am going", "have gone"],
+    "ans": 0,
+    "exp": "Present perfect para experiencias: 'have been'."
+  },
+  {
+    "q": "Find the error: She don't like coffee.",
+    "opts": ["She", "don't", "like", "coffee"],
+    "ans": 1,
+    "exp": "Con 'she' es 'doesn't like'."
+  },
+  {
+    "q": "Which word is a synonym of 'begin'?",
+    "opts": ["finish", "start", "close", "avoid"],
+    "ans": 1,
+    "exp": "'begin' y 'start' son sinónimos."
+  },
+  {
+    "q": "Choose the correct preposition: It depends ______ you.",
+    "opts": ["of", "on", "from", "at"],
+    "ans": 1,
+    "exp": "La expresión fija es 'depend on'."
+  },
+  {
+    "q": "Complete: If I __________ more time, I would learn German.",
+    "opts": ["have", "had", "will have", "am having"],
+    "ans": 1,
+    "exp": "Second conditional: If + past simple → would + base form."
+  },
+  {
+    "q": "Reported speech: He said, 'I am tired.'",
+    "opts": ["He said he is tired.", "He said he was tired.", "He says he was tired.", "He told he was tired."],
+    "ans": 1,
+    "exp": "Backshift: am → was en estilo indirecto."
+  },
+  {
+    "q": "Choose the best option: We need to cut __________ on expenses.",
+    "opts": ["up", "down", "off", "out"],
+    "ans": 1,
+    "exp": "Phrasal verb: 'cut down on' = reducir."
+  },
+  {
+    "q": "Correct option: She is the __________ student in the class.",
+    "opts": ["most intelligent", "more intelligent", "intelligenter", "much intelligent"],
+    "ans": 0,
+    "exp": "Superlativo: 'the most intelligent'."
+  },
+  {
+    "q": "Past simple vs present perfect: I __________ my keys yesterday.",
+    "opts": ["have lost", "lost", "was losing", "have been losing"],
+    "ans": 1,
+    "exp": "Ayer → tiempo terminado → past simple ('lost')."
+  },
+  {
+    "q": "Vocabulary: 'affordable' means",
+    "opts": ["expensive", "cheap enough", "dangerous", "boring"],
+    "ans": 1,
+    "exp": "'affordable' = asequible."
+  },
+  {
+    "q": "Modal verbs: You __________ wear a helmet. It's obligatory.",
+    "opts": ["must", "should", "could", "might"],
+    "ans": 0,
+    "exp": "'must' expresa obligación fuerte."
+  },
+  {
+    "q": "Choose the correct question tag: You work here, __________?",
+    "opts": ["do you", "don't you", "are you", "aren't you"],
+    "ans": 1,
+    "exp": "Afirmativa + tag negativa con 'do': 'don't you?'."
+  },
+  {
+    "q": "Choose the correct article: He is __________ engineer.",
+    "opts": ["a", "an", "the", "—"],
+    "ans": 1,
+    "exp": "Vocal inicial (engineer) → 'an'."
+  },
+  {
+    "q": "Passive voice: They will publish the results tomorrow.",
+    "opts": ["The results are published tomorrow.", "The results will be published tomorrow.", "The results were published tomorrow.", "The results have been published tomorrow."],
+    "ans": 1,
+    "exp": "Futuro pasiva: will be + past participle."
+  },
+  {
+    "q": "Choose the best option: I look forward __________ from you.",
+    "opts": ["to hear", "hearing", "to hearing", "hear"],
+    "ans": 2,
+    "exp": "Estructura fija: 'look forward to' + gerundio."
+  },
+  {
+    "q": "Phrasal verbs: Please, fill __________ this form.",
+    "opts": ["in", "up", "on", "off"],
+    "ans": 0,
+    "exp": "'fill in' = rellenar (un formulario)."
+  },
+  {
+    "q": "Comparatives: This exam is __________ than the last one.",
+    "opts": ["difficult", "more difficult", "most difficult", "difficultest"],
+    "ans": 1,
+    "exp": "Comparativo con adjetivos largos: 'more + adj'."
+  },
+  {
+    "q": "Choose the correct option: By 2025, they __________ the new bridge.",
+    "opts": ["finish", "will finish", "will have finished", "have finished"],
+    "ans": 2,
+    "exp": "Future perfect: will have + past participle."
+  },
+  {
+    "q": "Conditionals: If it rains, we __________ at home.",
+    "opts": ["will stay", "stay", "stayed", "would stay"],
+    "ans": 0,
+    "exp": "First conditional: If + present → will + base form."
+  },
+  {
+    "q": "Error spotting: He suggested to go by train.",
+    "opts": ["He", "suggested", "to go", "by train"],
+    "ans": 2,
+    "exp": "Después de 'suggest' va gerundio: 'suggested going'."
+  }
+]
