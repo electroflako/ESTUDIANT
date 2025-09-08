@@ -1,37 +1,35 @@
 <!doctype html>
 <!-- =========================================================
-     ESTUDIANT – Web App (archivo único)
-     Un solo contenedor BEM: .app
-     Buenas prácticas, 100% offline/online (mejor en Netlify/Vercel)
-     Funciones: catálogo de materias (MATERIAS/catalog.json),
-                importar JSON, exportar/importar CSV, repaso/examen,
-                temporizador y persistencia local.
+     ESTUDIANT – App de Examen Offline (v.Final para iOS/Local)
+     BEM + Buenas prácticas + Un solo contenedor (.app)
+     Funciona 100% online (Netlify/GitHub Pages) y en local (PC/Mac)
      ========================================================= -->
 <html lang="es">
 <head>
-  <!-- ============== Metadatos ============== -->
+  <!-- =================== Metadatos =================== -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ESTUDIANT</title>
 
-  <!-- ============== CSS (BEM) ============== -->
+  <!-- =================== CSS (BEM) =================== -->
   <style>
-    /* ===== Tema ===== */
+    /* ===== Paleta / Tema ===== */
     :root{
-      --bg:#0b1020; --bg2:#0e1530; --card:#121a33;
+      --bg:#0b1020; --bg-2:#0e1530; --card:#121a33;
       --text:#e9efff; --muted:#a9b7db; --border:#22305c;
       --accent:#5dd0ff; --ok:#35d49a; --bad:#ff6b6b; --warn:#ffd166;
     }
+
     /* ===== Reset mínimo ===== */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
-      color:var(--text); background:linear-gradient(180deg,var(--bg),var(--bg2) 45%,var(--bg));
+      color:var(--text); background:linear-gradient(180deg,var(--bg),var(--bg-2) 45%,var(--bg));
     }
 
     /* =========================================================
-       Bloque único: .app (contenedor raíz)
+       Bloque ÚNICO: .app  (contenedor raíz)
        ========================================================= */
     .app{max-width:1040px; margin:28px auto; padding:0 16px}
     .app__header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px}
@@ -42,7 +40,7 @@
     .app__list{margin-top:12px}
     .app__footer{margin:22px 0 38px; color:var(--muted); font-size:.9rem}
 
-    /* ===== Botón (elemento) ===== */
+    /* ===== Botones ===== */
     .app__btn{appearance:none; border:none; border-radius:10px; padding:10px 14px;
               background:#1a2548; color:var(--text); cursor:pointer;
               border:1px solid var(--border); transition:transform .05s ease, background .2s ease}
@@ -54,11 +52,11 @@
     .app__btn--warn{background:#3d2f13; border-color:#906d26}
     .app__btn--danger{background:#4a1f1f; border-color:#8a3030}
 
-    /* ===== Píldora (elemento) ===== */
+    /* ===== Píldoras ===== */
     .app__pill{padding:.1rem .5rem; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:.78rem}
 
     /* =========================================================
-       Panel (elementos reutilizables: import, modo, catálogo, CSV)
+       Elemento: panel (importación / modo / resumen CSV)
        ========================================================= */
     .app__panel{margin:10px 0 12px}
     .app__panel-summary{cursor:pointer; color:var(--accent)}
@@ -69,7 +67,7 @@
     .app__panel-hint{color:var(--muted); font-size:.9rem}
 
     /* =========================================================
-       Tarjeta de pregunta: .app__card (+ modificadores)
+       Elemento: card (pregunta)
        ========================================================= */
     .app__card{background:rgba(18,26,51,.86); border:1px solid var(--border); border-radius:14px; padding:16px 16px 10px; margin:14px 0}
     .app__card--ok{border-left:6px solid var(--ok)}
@@ -102,20 +100,20 @@
 </head>
 <body>
   <!-- =========================================================
-       HTML – CONTENEDOR ÚNICO (Bloque .app)
+       HTML – CONTENEDOR ÚNICO (Bloque: .app)
        ========================================================= -->
   <div class="app" id="app">
     <!-- Header -->
     <header class="app__header">
       <div>
         <h1 class="app__title">ESTUDIANT</h1>
-        <p class="app__subtitle" id="txt-subtitle">Importar JSON/CSV, catálogo en la nube, modo repaso/examen, exportar CSV. 100% offline/online.</p>
+        <p class="app__subtitle" id="txt-subtitle">Uso online/offline. Importar JSON/CSV, modo repaso y examen, exportar CSV.</p>
       </div>
       <div class="app__toolbar">
-        <button id="btn-shuffle"   class="app__btn app__btn--accent">Mezclar</button>
-        <button id="btn-check-all" class="app__btn app__btn--ok">Corregir todo</button>
-        <button id="btn-reset"     class="app__btn app__btn--warn">Reiniciar</button>
-        <button id="btn-export"    class="app__btn app__btn--ok">Exportar CSV</button>
+        <button id="btn-shuffle"    class="app__btn app__btn--accent">Mezclar</button>
+        <button id="btn-check-all"  class="app__btn app__btn--ok">Corregir todo</button>
+        <button id="btn-reset"      class="app__btn app__btn--warn">Reiniciar</button>
+        <button id="btn-export"     class="app__btn app__btn--ok">Exportar CSV</button>
         <input  id="file-csv" type="file" accept=".csv,text/csv" style="display:none">
         <button id="btn-import-csv" class="app__btn app__btn--accent">Importar CSV</button>
         <button id="btn-swap-label" class="app__btn app__btn--accent">Intercambiar etiquetas</button>
@@ -130,26 +128,11 @@
         <div class="app__panel-row">
           <input id="file-json" type="file" accept="application/json" class="app__panel-input" />
           <button id="btn-load-file" class="app__btn app__btn--accent">Cargar archivo JSON</button>
-          <span class="app__panel-hint">Recomendado para modo offline (PC/Mac).</span>
+          <span class="app__panel-hint">Recomendado para uso offline.</span>
         </div>
         <textarea id="txt-json" class="app__panel-textarea" placeholder='[{"q":"Pregunta 1","opts":["A","B","C","D"],"ans":0,"exp":"Explicación..."}]'></textarea>
         <div class="app__panel-row">
           <button id="btn-load-text" class="app__btn app__btn--ok">Cargar JSON pegado</button>
-        </div>
-      </div>
-    </details>
-
-    <!-- Panel: Catálogo (MATERIAS/catalog.json) -->
-    <details class="app__panel" id="panel-catalog">
-      <summary class="app__panel-summary">Materias del repositorio</summary>
-      <div class="app__panel-body">
-        <div class="app__panel-row">
-          <select id="catalog-select" class="app__panel-input" aria-label="Selecciona materia"></select>
-          <button id="btn-load-catalog"   class="app__btn app__btn--ok">Cargar materia</button>
-          <button id="btn-reload-catalog" class="app__btn app__btn--accent" title="Vuelve a leer catalog.json">Actualizar catálogo</button>
-        </div>
-        <div class="app__panel-row">
-          <span class="app__panel-hint">Los bancos se leen desde <code>MATERIAS/catalog.json</code> (mismo sitio en Netlify).</span>
         </div>
       </div>
     </details>
@@ -163,7 +146,7 @@
             <input id="inp-minutes" type="number" min="1" max="300" value="20" class="app__panel-input">
           </label>
           <label><input id="chk-shuffle" type="checkbox" checked> Mezclar al iniciar</label>
-          <span class="app__panel-hint" id="txt-mode-hint">Sin feedback hasta “Finalizar”.</span>
+          <span class="app__panel-hint" id="txt-mode-hint">Sin feedback hasta “Finalizar examen”.</span>
         </div>
         <div class="app__panel-row">
           <button id="btn-start"     class="app__btn app__btn--ok">Iniciar examen</button>
@@ -192,11 +175,11 @@
 
     <!-- Pie -->
     <footer class="app__footer">
-      Para iPhone/iPad, sirve desde Netlify/Vercel y añade a pantalla de inicio. Para PC/Mac, funciona local con doble clic (recomendado Chrome/Brave).
+      Para iOS/iPadOS: subir a Netlify/GitHub Pages. Para PC/Mac, funciona localmente con doble clic.
     </footer>
   </div>
 
-  <!-- ============== JavaScript (IIFE) ============== -->
+  <!-- =================== JavaScript (IIFE) =================== -->
   <script>
   (function(){
     'use strict';
@@ -216,10 +199,10 @@
     function download(name,text){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0);}
 
     /* ---------- Claves de storage ---------- */
-    const KEY={state:'app_state_v2', data:'app_data_v2', labels:'app_labels_v2'};
+    const KEY={state:'app_state_vFinal', data:'app_data_vFinal', labels:'app_labels_vFinal'};
 
-    /* ---------- DOM refs ---------- */
-    const $root=$('#app'), $list=$('#list'), $pillS=$('#pill-score'), $pillT=$('#pill-timer'), $pillD=$('#pill-dataset');
+    /* ---------- DOM ---------- */
+    const $root  =$('#app'), $list=$('#list'), $pillS=$('#pill-score'), $pillT=$('#pill-timer'), $pillD=$('#pill-dataset');
     const $panelCSV=$('#panel-csv'), $sumCSV=$('#csv-summary');
     const $txtModeSummary=$('#txt-mode-summary'), $txtModeHint=$('#txt-mode-hint'), $txtSubtitle=$('#txt-subtitle');
 
@@ -239,12 +222,10 @@
 
     /* ---------- Estado ---------- */
     let EXAM=[], EXAM_FP='fp_0', order=[], answers=[], result=[];
-    let labelsMode = localStorage.getItem(KEY.labels)||'examen';  // 'examen'|'repaso'
+    let labelsMode = localStorage.getItem(KEY.labels)||'examen';
     let mode = {isExam:false,running:false,finished:false,durationMs:0,endAt:0,timer:null};
 
-    /* =========================================================
-       Render y lógica de tarjetas
-       ========================================================= */
+    /* ---------- Render ---------- */
     function render({shuffleOptions=false, resetOrder=true}={}){
       if(resetOrder) order=EXAM.map((_,i)=>i);
       $list.innerHTML='';
@@ -279,35 +260,27 @@
       updateStats();
     }
 
+    /* ---------- Corrección ---------- */
     function checkCard(card,reveal=false){
       const vi=Number(card.dataset.viewIndex), oi=Number(card.dataset.origIndex), it=EXAM[oi];
       const sel=card.querySelector('input[type="radio"]:checked');
       const fb=card.querySelector('.app__card-feedback'), exp=card.querySelector('.app__card-exp');
       const boxes=[...card.querySelectorAll('.app__card-option')];
-
       if(!sel){ fb.className='app__card-feedback app__card-feedback--bad'; fb.textContent='Elige una opción antes de comprobar.'; exp.style.display=reveal?'block':'none'; return; }
-
       const chosen=Number(sel.value), ok=(chosen===it.ans); answers[vi]=chosen;
       if(!mode.isExam||reveal) result[vi]=ok;
-
       boxes.forEach(b=>b.classList.remove('app__card-option--correct','app__card-option--wrong'));
       card.classList.remove('app__card--ok','app__card--bad');
-
       boxes.forEach(b=>{ const v=Number(b.querySelector('input').value); if(v===it.ans&&(!mode.isExam||reveal)) b.classList.add('app__card-option--correct'); });
       if(!ok&&(!mode.isExam||reveal)){ sel.closest('.app__card-option').classList.add('app__card-option--wrong'); }
-
       if(!mode.isExam||reveal){
         fb.className= ok ? 'app__card-feedback app__card-feedback--ok':'app__card-feedback app__card-feedback--bad';
         fb.textContent= ok ? '¡Correcto!' : `Incorrecto. Respuesta correcta: "${it.opts[it.ans]}".`;
         card.classList.add(ok?'app__card--ok':'app__card--bad');
         exp.style.display='block';
-      }else{
-        fb.className='app__card-feedback app__card-feedback--muted';
-        fb.textContent='Respuesta registrada.'; exp.style.display='none';
-      }
+      }else{ fb.className='app__card-feedback app__card-feedback--muted'; fb.textContent='Respuesta registrada.'; exp.style.display='none'; }
       saveState(); updateStats();
     }
-
     function clearCard(card){
       const vi=Number(card.dataset.viewIndex);
       [...card.querySelectorAll('input[type="radio"]')].forEach(i=>i.checked=false);
@@ -319,21 +292,17 @@
       saveState(); updateStats();
     }
 
-    /* =========================================================
-       Acciones globales
-       ========================================================= */
+    /* ---------- Acciones globales ---------- */
     function updateStats(){ const ok=result.filter(v=>v===true).length; $pillS.textContent=`Aciertos: ${ok} / ${EXAM.length}`; $pillD.textContent=`Dataset: ${EXAM_FP===fp(DEFAULT_EXAM)?'por defecto':'personalizado'}`; }
-    function checkAll(){ $$('.app__card').forEach(c=>checkCard(c,mode.isExam)); saveState(); }
+    function checkAll(){ $$('.app__card').forEach(c=>checkCard(c, mode.isExam)); saveState(); }
     function resetAll(){ $$('.app__card').forEach(clearCard); saveState(); }
     function shuffleAll(){ order=shuffle(order); render({shuffleOptions:true, resetOrder:false}); saveState(); }
 
-    /* =========================================================
-       Modo repaso/examen + temporizador
-       ========================================================= */
-    function setPracticeDisabled(dis){
-      $('#btn-shuffle').disabled=dis; $('#btn-check-all').disabled=dis; $('#btn-reset').disabled=dis;
-      $('#btn-load-file').disabled=dis; $('#btn-load-text').disabled=dis; $('#file-json').disabled=dis; $('#txt-json').disabled=dis;
-      $('#btn-import-csv').disabled=dis; $('#file-csv').disabled=dis;
+    /* ---------- Modo examen/repaso ---------- */
+    function setPracticeDisabled(d){
+      $('#btn-shuffle').disabled=d; $('#btn-check-all').disabled=d; $('#btn-reset').disabled=d;
+      $('#btn-load-file').disabled=d; $('#btn-load-text').disabled=d; $('#file-json').disabled=d; $('#txt-json').disabled=d;
+      $('#btn-import-csv').disabled=d; $('#file-csv').disabled=d;
     }
     function startExam(){
       if(mode.running) return;
@@ -366,9 +335,7 @@
     function stopTimer(){ if(mode.timer){ clearInterval(mode.timer); mode.timer=null; } updateTimer(); }
     function updateTimer(){ const left=Math.max(0,mode.endAt-now()); $pillT.textContent=fmt(left); }
 
-    /* =========================================================
-       Persistencia (localStorage)
-       ========================================================= */
+    /* ---------- Persistencia ---------- */
     function saveData(){ try{ localStorage.setItem(KEY.data, JSON.stringify({fp:EXAM_FP, exam:EXAM})); }catch{} }
     function loadData(){ try{ const raw=localStorage.getItem(KEY.data); if(!raw) return null; const o=JSON.parse(raw); return Array.isArray(o?.exam)?o:null; }catch{return null} }
     function saveState(){
@@ -388,40 +355,27 @@
         order  = Array.isArray(o.order)&&o.order.length===EXAM.length? o.order.slice(): EXAM.map((_,i)=>i);
         answers= Array.isArray(o.answers)? o.answers.slice(): Array(EXAM.length).fill(null);
         result = Array.isArray(o.result) ? o.result.slice() : Array(EXAM.length).fill(null);
-
-        // Render respetando orden (sin barajar)
+        // Render respetando orden
         $list.innerHTML='';
         order.forEach((oi,vi)=>{
           const it=EXAM[oi];
           const card=document.createElement('div'); card.className='app__card'; card.dataset.viewIndex=vi; card.dataset.origIndex=oi;
           const opts=it.opts.map((t,i)=>({t,i}));
           card.innerHTML=`
-            <div class="app__card-head">
-              <span class="app__card-tag">Pregunta ${vi+1}</span>
-              <span class="app__card-tag">Opciones: 4</span>
-            </div>
+            <div class="app__card-head"><span class="app__card-tag">Pregunta ${vi+1}</span><span class="app__card-tag">Opciones: 4</span></div>
             <p class="app__card-title">${it.q}</p>
-            <div class="app__card-options">
-              ${opts.map((op,k)=>`<label class="app__card-option"><input type="radio" name="q${vi}" value="${op.i}"><div><strong>${L[k]}.</strong> ${op.t}</div></label>`).join('')}
-            </div>
-            <div class="app__card-actions">
-              <button class="app__btn app__btn--ok" data-action="check">Comprobar</button>
-              <button class="app__btn app__btn--warn" data-action="clear">Limpiar</button>
-              <span class="app__card-hint">Responde y comprueba.</span>
-            </div>
-            <div class="app__card-feedback app__card-feedback--muted" aria-live="polite">Sin responder.</div>
-            <div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>`;
+            <div class="app__card-options">${opts.map((op,k)=>`<label class="app__card-option"><input type="radio" name="q${vi}" value="${op.i}"><div><strong>${L[k]}.</strong> ${op.t}</div></label>`).join('')}</div>
+            <div class="app__card-actions"><button class="app__btn app__btn--ok" data-action="check">Comprobar</button><button class="app__btn app__btn--warn" data-action="clear">Limpiar</button><span class="app__card-hint">Responde y comprueba.</span></div>
+            <div class="app__card-feedback app__card-feedback--muted" aria-live="polite">Sin responder.</div><div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>`;
           $list.appendChild(card);
         });
-
         answers.forEach((v,i)=>{ if(v!==null){ const inp=document.querySelector(`.app__card[data-view-index="${i}"] input[value="${v}"]`); if(inp) inp.checked=true; } });
-
         // Restaura modo
         if(o.mode){
           mode.isExam=!!o.mode.isExam; mode.running=!!o.mode.running; mode.finished=!!o.mode.finished;
           mode.durationMs=o.mode.durationMs||0; mode.endAt=o.mode.endAt||0;
           if(mode.isExam){
-            $root.classList.add('app--exam'); setPracticeDisabled(mode.running);
+            $root.classList.add('app--mode-exam'); setPracticeDisabled(mode.running);
             if(mode.finished){
               $$('.app__card').forEach(c=>checkCard(c,true));
               $$('.app__card input[type="radio"]').forEach(i=>i.disabled=true);
@@ -434,13 +388,11 @@
           }
         }
         updateStats(); return true;
-      }catch{ return false; }
+      }catch{return false;}
     }
     function clearAll(){ try{ localStorage.removeItem(KEY.state); localStorage.removeItem(KEY.data); localStorage.removeItem(KEY.labels); }catch{} }
 
-    /* =========================================================
-       Importar JSON (archivo/pegado)
-       ========================================================= */
+    /* ---------- Importación JSON ---------- */
     function validateJSON(arr){
       if(!Array.isArray(arr)) return 'El JSON debe ser un arreglo.';
       for(let i=0;i<arr.length;i++){
@@ -463,16 +415,14 @@
       resetMode(); saveData(); saveState();
     }
 
-    /* =========================================================
-       Exportar/Importar CSV (calificar)
-       ========================================================= */
+    /* ---------- Exportación CSV ---------- */
     function exportCSV(){
       const rows=[['#','Pregunta','Elegida (letra)','Elegida (texto)','Correcta (letra)','Correcta (texto)','¿Correcta?','¿Corregida?'].join(',')];
       $$('.app__card').forEach((card,i)=>{
         const oi=Number(card.dataset.origIndex), it=EXAM[oi], map={};
         [...card.querySelectorAll('.app__card-option')].forEach((box,k)=>{
           const idx=Number(box.querySelector('input').value);
-          const txt=box.querySelector('div').innerText.replace(/^[A-D]\.\s*/, '');
+          const txt=box.querySelector('div').innerText.replace(/^[A-D]\.\s*/,'');
           map[idx]={letter:L[k], text:txt};
         });
         const chosen=answers[i];
@@ -485,6 +435,7 @@
       download(`examen_${ts}.csv`, rows.join('\n'));
     }
 
+    /* ---------- Importación CSV ---------- */
     function parseCSV(text){
       const rows=[]; let row=[], cell='', q=false;
       for(let i=0;i<text.length;i++){
@@ -501,91 +452,49 @@
       const iCh=header.findIndex(h=>h.includes('elegida')&&h.includes('letra'));
       const iCo=header.findIndex(h=>h.includes('correcta')&&h.includes('letra'));
       let total=0,correct=0,answered=0, fails=[];
+
       if(iCh!==-1&&iCo!==-1){
         data.forEach((r,i)=>{ const ch=(r[iCh]||'').trim().toUpperCase(), co=(r[iCo]||'').trim().toUpperCase();
-          if(['A','B','C','D'].includes(ch)) answered++;
-          if(ch&&co&&ch===co) correct++; total++; if(ch&&co&&ch!==co) fails.push({n:i+1,ch,co});
+          if(['A','B','C','D'].includes(ch)) answered++; if(ch&&co&&ch===co) correct++; total++; if(ch&&co&&ch!==co) fails.push({n:i+1,ch,co});
         });
-        $sumCSV.innerHTML=`<p><strong>Formato:</strong> CSV exportado.</p>
+        $sumCSV.innerHTML=`<p><strong>Formato:</strong> CSV exportado por la app.</p>
           <p><strong>Preguntas:</strong> ${total} | <strong>Respondidas:</strong> ${answered} | <strong>Aciertos:</strong> ${correct} | <strong>Nota:</strong> ${((correct/Math.max(1,total))*10).toFixed(2)}/10</p>
           ${fails.length?`<details><summary>Fallos (${fails.length})</summary><ul>${fails.map(m=>`<li>Preg. ${m.n}: marcó ${m.ch}, correcta ${m.co}</li>`).join('')}</ul></details>`:'<p>Sin fallos 🎉</p>'}`;
         return;
       }
+
       const toks=text.toUpperCase().match(/[A-D]/g)||[];
       total=EXAM.length; if(!toks.length){ $sumCSV.innerHTML='<p>No se detectaron respuestas (A–D).</p>'; return; }
       toks.slice(0,total).forEach((ch,i)=>{ const oi=order[i], co=L[EXAM[oi].ans]; if(ch===co) correct++; else fails.push({n:i+1,ch,co}); });
       answered=Math.min(toks.length,total);
       $sumCSV.innerHTML=`<p><strong>Formato:</strong> lista simple (A–D).</p>
         <p><em>Ojo:</em> califica según el <strong>orden visible</strong>.</p>
-        <p><strong>Preguntas:</strong> ${total} | <strong>Respondidas:</strong> ${answered} | <strong> Aciertos:</strong> ${correct} | <strong>Nota:</strong> ${((correct/Math.max(1,total))*10).toFixed(2)}/10</p>
+        <p><strong>Preguntas:</strong> ${total} | <strong>Respondidas:</strong> ${answered} | <strong>Aciertos:</strong> ${correct} | <strong>Nota:</strong> ${((correct/Math.max(1,total))*10).toFixed(2)}/10</p>
         ${fails.length?`<details open><summary>Fallos (${fails.length})</summary><ul>${fails.map(m=>`<li>Preg. ${m.n}: marcó ${m.ch}, correcta ${m.co}</li>`).join('')}</ul></details>`:'<p>Sin fallos 🎉</p>'}`;
     }
 
-    /* =========================================================
-       Etiquetas examen/repaso (UI)
-       ========================================================= */
+    /* ---------- Etiquetas examen/repaso (UI) ---------- */
     function applyLabels(){
       const repaso=(labelsMode==='repaso');
       $txtModeSummary.textContent = repaso ? 'Modo repaso' : 'Modo examen';
-      $txtModeHint.textContent    = repaso ? 'Feedback inmediato con “Comprobar”.' : 'Sin feedback hasta “Finalizar”.';
-      $('#btn-start').textContent     = repaso ? 'Iniciar repaso'   : 'Iniciar examen';
+      $txtModeHint.textContent    = repaso ? 'Feedback inmediato: usa “Comprobar”.' : 'Sin feedback hasta “Finalizar”.';
+      $('#btn-start').textContent     = repaso ? 'Iniciar repaso' : 'Iniciar examen';
       $('#btn-finish').textContent    = repaso ? 'Finalizar repaso' : 'Finalizar examen';
       $('#btn-resetmode').textContent = repaso ? 'Reiniciar modo repaso' : 'Reiniciar modo examen';
-      $txtSubtitle.textContent   = repaso ? 'Importar JSON/CSV, catálogo en la nube, modo repaso/examen, exportar CSV.' :
-                                            'Importar JSON/CSV, catálogo en la nube, modo repaso/examen, exportar CSV.';
+      $txtSubtitle.textContent   = repaso ? 'Uso 100% local. Importar JSON/CSV, modo repaso y examen, exportar CSV.' :
+                                            'Uso 100% local. Importar JSON/CSV, modo repaso y examen, exportar CSV.';
       localStorage.setItem(KEY.labels, labelsMode);
     }
     function swapLabels(){ labelsMode=(labelsMode==='examen'?'repaso':'examen'); applyLabels(); }
 
-    /* =========================================================
-       Catálogo de materias (MATERIAS/catalog.json)
-       ========================================================= */
-    async function fetchCatalog(){
-      const res = await fetch('MATERIAS/catalog.json', { cache: 'no-store' });
-      if(!res.ok) throw new Error(`No se pudo cargar catalog.json (${res.status})`);
-      return await res.json();
-    }
-    function populateCatalog(items){
-      const sel = document.getElementById('catalog-select');
-      sel.innerHTML = '';
-      if(!Array.isArray(items) || !items.length){
-        const opt=document.createElement('option'); opt.value=''; opt.textContent='No hay materias en el catálogo';
-        sel.appendChild(opt); return;
-      }
-      items.forEach(item=>{
-        const opt=document.createElement('option');
-        opt.value=item.file; opt.textContent=item.title||item.id||item.file;
-        sel.appendChild(opt);
-      });
-    }
-    async function loadCatalogIntoSelect(){
-      try{ const catalog=await fetchCatalog(); populateCatalog(catalog); }
-      catch(e){ console.warn(e); const sel=document.getElementById('catalog-select'); sel.innerHTML=''; const opt=document.createElement('option'); opt.value=''; opt.textContent='Error al leer catalog.json'; sel.appendChild(opt); }
-    }
-    async function loadSelectedDataset(){
-      const sel=document.getElementById('catalog-select'); const file=sel.value;
-      if(!file){ alert('No hay materia seleccionada.'); return; }
-      try{
-        const res=await fetch(file, { cache: 'no-store' });
-        if(!res.ok) throw new Error(`No se pudo cargar ${file} (${res.status})`);
-        const json=await res.json();
-        setDataset(json, file.replace(/^MATERIAS\//,''));
-        alert('Materia cargada: ' + file);
-      }catch(e){ alert('Error al cargar el banco: ' + e.message); }
-    }
-
-    /* =========================================================
-       Eventos
-       ========================================================= */
+    /* ---------- Eventos ---------- */
     document.addEventListener('DOMContentLoaded', ()=>{
-      // Dataset guardado o por defecto
       const saved=loadData();
       if(saved){ EXAM=saved.exam; EXAM_FP=fp(EXAM); $pillD.textContent='Dataset: restaurado'; }
       else     { EXAM=DEFAULT_EXAM; EXAM_FP=fp(EXAM); $pillD.textContent='Dataset: por defecto'; }
 
       applyLabels(); render({shuffleOptions:false, resetOrder:true}); loadState();
 
-      // Delegación tarjetas
       $list.addEventListener('click', e=>{
         const btn=e.target.closest('button'); if(!btn) return;
         const card=e.target.closest('.app__card'); if(!card) return;
@@ -598,7 +507,6 @@
         answers[vi]=Number(inp.value); saveState();
       });
 
-      // Toolbar
       $('#btn-shuffle').addEventListener('click', shuffleAll);
       $('#btn-check-all').addEventListener('click', checkAll);
       $('#btn-reset').addEventListener('click', resetAll);
@@ -606,22 +514,24 @@
       $('#btn-clear').addEventListener('click', ()=>{ if(confirm('¿Borrar estado y dataset guardados?')){ try{localStorage.removeItem(KEY.state);localStorage.removeItem(KEY.data);localStorage.removeItem(KEY.labels);}catch{} location.reload(); } });
       $('#btn-swap-label').addEventListener('click', swapLabels);
 
-      // JSON
       $('#btn-load-file').addEventListener('click', async ()=>{
         const f=$('#file-json').files?.[0]; if(!f) return alert('Selecciona un archivo JSON.');
-        try{ const json=await readJSONFile(f); const err=validateJSON(json); if(err) throw new Error(err); setDataset(json, f.name||'archivo'); alert('Dataset cargado.'); }catch(e){ alert('Error: '+e.message); }
+        try{ const json=await (new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{try{res(JSON.parse(String(r.result)));}catch(e){rej(e);}};r.onerror=()=>rej(r.error||new Error('No se pudo leer.'));r.readAsText(f,'utf-8');}));
+             const err=validateJSON(json); if(err) throw new Error(err);
+             setDataset(json, f.name||'archivo'); alert('Dataset cargado.'); }
+        catch(e){ alert('Error: '+e.message); }
       });
       $('#btn-load-text').addEventListener('click', ()=>{
         const raw=$('#txt-json').value.trim(); if(!raw) return alert('Pega JSON en el cuadro.');
-        try{ const json=JSON.parse(raw); const err=validateJSON(json); if(err) throw new Error(err); setDataset(json,'pegado'); alert('Dataset cargado.'); }catch(e){ alert('JSON inválido: '+e.message); }
+        try{ const json=JSON.parse(raw); const err=validateJSON(json); if(err) throw new Error(err);
+             setDataset(json,'pegado'); alert('Dataset cargado.'); }
+        catch(e){ alert('JSON inválido: '+e.message); }
       });
 
-      // Modo
       $('#btn-start').addEventListener('click', startExam);
       $('#btn-finish').addEventListener('click', finishExam);
       $('#btn-resetmode').addEventListener('click', resetMode);
 
-      // CSV
       const fileCSV=$('#file-csv');
       $('#btn-import-csv').addEventListener('click', ()=>{ fileCSV.value=''; fileCSV.click(); });
       fileCSV.addEventListener('change', ()=>{
@@ -631,11 +541,6 @@
         r.onerror= ()=> alert('No se pudo leer el CSV.');
         r.readAsText(f,'utf-8');
       });
-
-      // Catálogo
-      $('#btn-reload-catalog').addEventListener('click', loadCatalogIntoSelect);
-      $('#btn-load-catalog').addEventListener('click', loadSelectedDataset);
-      loadCatalogIntoSelect(); // cargar al inicio
     });
   })();
   </script>
