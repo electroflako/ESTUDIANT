@@ -2,12 +2,12 @@
 <!--
   ============================================================
   ESTUDIANT – Web App (archivo único)
-  Un solo contenedor BEM: .app
+  Contenedor único BEM: .app
   Funciones:
-    · Catálogo (MATERIAS/catalog.json) para cargar bancos .json
+    · Catálogo (MATERIAS/catalog.json) para cargar bancos .json del sitio
     · Importar JSON (archivo/pegado)
     · Exportar/Importar CSV (calificar)
-    · Modo repaso/examen con temporizador
+    · Modo repaso/examen con temporizador y bloqueo al finalizar
     · Persistencia (localStorage)
     · Responsive + una sola columna siempre
     · NO sticky
@@ -23,20 +23,29 @@
 
   <!-- ========== CSS (BEM + responsive + una columna) ========== -->
   <style>
+    /* --------------------------------------------------------
+       Tema y escala de espacios
+       -------------------------------------------------------- */
     :root{
       --bg:#0b1020; --bg2:#0e1530; --card:#121a33;
       --text:#e9efff; --muted:#a9b7db; --border:#22305c;
       --accent:#5dd0ff; --ok:#35d49a; --bad:#ff6b6b; --warn:#ffd166;
       --s-1:8px; --s-2:12px; --s-3:16px; --radius:12px;
     }
+
+    /* --------------------------------------------------------
+       Reset mínimo
+       -------------------------------------------------------- */
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font:16px/1.5 system-ui,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
       color:var(--text); background:linear-gradient(180deg,var(--bg),var(--bg2));
     }
 
-    /* Bloque único: .app */
+    /* =========================================================
+       Bloque único: .app
+       ========================================================= */
     .app{max-width:clamp(320px, 96vw, 1040px); margin:28px auto; padding:0 var(--s-3)}
     .app__header{display:flex; align-items:center; justify-content:space-between; gap:var(--s-3); margin-bottom:var(--s-3)}
     .app__title{margin:0 0 6px; font-size:1.6rem; letter-spacing:.02em}
@@ -75,7 +84,7 @@
     .app__card-head{display:flex; gap:var(--s-2); margin-bottom:var(--s-2)}
     .app__card-tag{font-size:.8rem; color:#9fb0d4; background:#162149; border:1px solid var(--border); padding:2px 8px; border-radius:999px}
     .app__card-title{margin:0; font-size:1.02rem}
-    .app__card-options{display:grid; gap:var(--s-2); margin:10px 0 var(--s-2); grid-template-columns:1fr}
+    .app__card-options{display:grid; gap:var(--s-2); margin:10px 0 var(--s-2); grid-template-columns:1fr} /* <<<-- AQUI ESTA EL CAMBIO */
     .app__card-option{display:flex; gap:10px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0f1732}
     .app__card-option input{margin-top:2px; transform:scale(1.15)}
     .app__card-option--correct{outline:2px solid rgba(53,212,154,.7); background:#0f1f1a}
@@ -124,11 +133,13 @@
     }
   </style>
 </head>
+
 <body>
   <!-- =========================================================
        CONTENEDOR ÚNICO (Bloque .app)
        ========================================================= -->
   <div class="app" id="app">
+
     <!-- Header (NO sticky) -->
     <header class="app__header">
       <div>
@@ -137,6 +148,7 @@
           Catálogo en la nube · Importar JSON/CSV · Modo repaso/examen · Exportar CSV
         </p>
       </div>
+
       <div class="app__toolbar">
         <button id="btn-shuffle"    class="app__btn app__btn--accent">Mezclar</button>
         <button id="btn-check-all"  class="app__btn app__btn--ok">Corregir todo</button>
@@ -158,14 +170,16 @@
           <button id="btn-load-file" class="app__btn app__btn--accent">Cargar archivo JSON</button>
           <span class="app__panel-hint">Recomendado para uso offline (PC/Mac).</span>
         </div>
-        <textarea id="txt-json" class="app__panel-textarea" placeholder='[{"q":"Pregunta 1","opts":["A","B","C","D"],"ans":0,"exp":"Explicación..."}]'></textarea>
+
+        <textarea id="txt-json" class="app__panel-textarea" placeholder='[ { "q":"Pregunta...", "opts":["A","B","C","D"], "ans":0, "exp":"..." } ]'></textarea>
+
         <div class="app__panel-row">
           <button id="btn-load-text" class="app__btn app__btn--ok">Cargar JSON pegado</button>
         </div>
       </div>
     </details>
 
-    <!-- Panel: Catálogo -->
+    <!-- Panel: Catálogo (MATERIAS/catalog.json) -->
     <details class="app__panel" id="panel-catalog">
       <summary class="app__panel-summary">Materias del repositorio</summary>
       <div class="app__panel-body">
@@ -175,7 +189,9 @@
           <button id="btn-reload-catalog" class="app__btn app__btn--accent" title="Actualizar catálogo">Actualizar catálogo</button>
         </div>
         <div class="app__panel-row">
-          <span class="app__panel-hint">Se lee <code>MATERIAS/catalog.json</code> desde tu sitio.</span>
+          <span class="app__panel-hint">
+            Se lee <code>MATERIAS/catalog.json</code> desde tu sitio (Netlify/Vercel).
+          </span>
         </div>
       </div>
     </details>
@@ -185,8 +201,14 @@
       <summary class="app__panel-summary" id="txt-mode-summary">Modo examen</summary>
       <div class="app__panel-body">
         <div class="app__panel-row">
-          <label>Duración (min):<input id="inp-minutes" type="number" min="1" max="300" value="20" class="app__panel-input"></label>
-          <label><input id="chk-shuffle" type="checkbox" checked /> Mezclar al iniciar</label>
+          <label>
+            Duración (min):
+            <input id="inp-minutes" type="number" min="1" max="300" value="20" class="app__panel-input" />
+          </label>
+          <label>
+            <input id="chk-shuffle" type="checkbox" checked />
+            Mezclar al iniciar
+          </label>
           <span class="app__panel-hint" id="txt-mode-hint">Sin feedback hasta “Finalizar”.</span>
         </div>
         <div class="app__panel-row">
