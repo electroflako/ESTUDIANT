@@ -2,15 +2,15 @@
 <!--
   ============================================================
   ESTUDIANT – Web App (archivo único)
-  Un solo contenedor BEM: .app
+  Contenedor único BEM: .app
   Funciones:
-    - Catálogo (MATERIAS/catalog.json) para cargar bancos .json desde tu sitio
-    - Importar JSON (archivo/pegado)
-    - Exportar/Importar CSV (calificar)
-    - Modo repaso/examen con temporizador y bloqueo al finalizar
-    - Persistencia (localStorage)
-    - Cabecera sticky + diseño responsive
-  Uso recomendado: desplegar en Netlify/Vercel (HTTPS)
+    · Catálogo (MATERIAS/catalog.json) para cargar bancos .json del propio sitio
+    · Importar JSON (archivo/pegado)
+    · Exportar/Importar CSV (calificar)
+    · Modo repaso/examen con temporizador y bloqueo al finalizar
+    · Persistencia (localStorage)
+    · Cabecera sticky SOLO en escritorio (no en móvil) + diseño responsive
+  Recomendado: desplegar en Netlify/Vercel (HTTPS) para uso en iPhone/iPad.
   ============================================================
 -->
 <html lang="es">
@@ -20,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ESTUDIANT</title>
 
-  <!-- ========== CSS (BEM + responsive) ========== -->
+  <!-- ========== CSS (BEM + responsive y limpio) ========== -->
   <style>
     /* --------------------------------------------------------
        Tema y escala de espacios
@@ -45,37 +45,41 @@
       background:linear-gradient(180deg,var(--bg),var(--bg2) 45%,var(--bg));
     }
 
-    /* --------------------------------------------------------
-       Bloque único: .app (contenedor raíz)
-       -------------------------------------------------------- */
+    /* =========================================================
+       Bloque ÚNICO: .app (contenedor raíz)
+       ========================================================= */
     .app{
       max-width:clamp(320px, 96vw, 1040px);
       margin:28px auto;
       padding:0 var(--s-3);
     }
 
-    /* Cabecera (sticky) */
+    /* Cabecera (NO sticky por defecto; se activa solo en escritorio) */
     .app__header{
       display:flex; align-items:center; justify-content:space-between; gap:var(--s-3);
       margin-bottom:var(--s-3);
+      background:transparent;
     }
-    .app__header--sticky{
-      /* Se “pega” al llegar arriba al hacer scroll */
-      position:sticky; top:0; z-index:1000;
-      background:linear-gradient(180deg, var(--card), rgba(18,26,51,.88));
-      backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
-      padding-top:calc(var(--s-2) + env(safe-area-inset-top, 0px));
-      border-bottom:1px solid var(--border);
+    /* Sticky SOLO ≥ 992px (evita problemas de viewport en móvil) */
+    @media (min-width: 992px){
+      .app__header--sticky{
+        position:sticky; top:0; z-index:1000;
+        background:linear-gradient(180deg, var(--card), rgba(18,26,51,.88));
+        backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+        padding-top:calc(var(--s-2) + env(safe-area-inset-top, 0px));
+        border-bottom:1px solid var(--border);
+      }
     }
 
     .app__title{ margin:0 0 6px; font-size:1.6rem; letter-spacing:.02em }
     .app__subtitle{ margin:0; color:var(--muted) }
 
     .app__toolbar{ display:flex; flex-wrap:wrap; gap:var(--s-2) }
+
     .app__stats{
       color:var(--muted); font-size:.95rem;
       display:flex; gap:var(--s-2); flex-wrap:wrap; align-items:center;
-      margin-top:var(--s-2)
+      margin-top:var(--s-2);
     }
 
     .app__list{ margin-top:var(--s-3) }
@@ -102,28 +106,28 @@
     /* Píldoras de estado */
     .app__pill{
       padding:.1rem .5rem; border-radius:999px;
-      border:1px solid var(--border); color:var(--muted); font-size:.78rem
+      border:1px solid var(--border); color:var(--muted); font-size:.78rem;
     }
 
     /* --------------------------------------------------------
-       Paneles reutilizables (import, catálogo, modo, resumen CSV)
+       Paneles (import, catálogo, modo, CSV)
        -------------------------------------------------------- */
     .app__panel{ margin:10px 0 12px }
     .app__panel-summary{ cursor:pointer; color:var(--accent) }
     .app__panel-body{
       border:1px solid var(--border); background:#0f1732;
       padding:var(--s-3); border-radius:var(--radius);
-      margin-top:var(--s-2); display:grid; gap:var(--s-2)
+      margin-top:var(--s-2); display:grid; gap:var(--s-2);
     }
     .app__panel-row{ display:flex; gap:var(--s-2); align-items:center; flex-wrap:wrap }
     .app__panel-input{
       padding:10px; border-radius:8px; border:1px solid var(--border);
-      background:#0b132a; color:var(--text)
+      background:#0b132a; color:var(--text);
     }
     .app__panel-textarea{
       width:100%; min-height:120px; padding:10px; border-radius:8px;
       border:1px solid var(--border); background:#0b132a; color:var(--text);
-      resize:vertical; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace
+      resize:vertical; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
     }
     .app__panel-hint{ color:var(--muted); font-size:.9rem }
 
@@ -133,7 +137,7 @@
     .app__card{
       background:rgba(18,26,51,.86); border:1px solid var(--border);
       border-radius:var(--radius); padding:var(--s-3) var(--s-3) var(--s-2);
-      margin:14px 0
+      margin:14px 0;
     }
     .app__card--ok{ border-left:6px solid var(--ok) }
     .app__card--bad{ border-left:6px solid var(--bad) }
@@ -141,18 +145,26 @@
     .app__card-head{ display:flex; gap:var(--s-2); margin-bottom:var(--s-2) }
     .app__card-tag{
       font-size:.8rem; color:#9fb0d4; background:#162149;
-      border:1px solid var(--border); padding:2px 8px; border-radius:999px
+      border:1px solid var(--border); padding:2px 8px; border-radius:999px;
     }
     .app__card-title{ margin:0; font-size:1.02rem }
 
-    /* Grid responsive de opciones */
+    /* Grid de opciones:
+       · Móvil/tablet: 1 columna (legible)
+       · Escritorio:   2 columnas fijas (alineación estable 2×2) */
     .app__card-options{
       display:grid; gap:var(--s-2); margin:10px 0 var(--s-2);
-      grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+      align-items:stretch;
+      grid-template-columns:1fr; /* móvil por defecto */
     }
+    @media (min-width: 992px){
+      .app__card-options{ grid-template-columns:repeat(2, 1fr); }
+    }
+
     .app__card-option{
-      display:flex; gap:10px; padding:10px 12px; border-radius:10px;
-      border:1px solid var(--border); background:#0f1732
+      display:flex; gap:10px; padding:10px 12px;
+      border-radius:10px; border:1px solid var(--border);
+      background:#0f1732; height:100%;
     }
     .app__card-option input{ margin-top:2px; transform:scale(1.15) }
     .app__card-option--correct{ outline:2px solid rgba(53,212,154,.7); background:#0f1f1a }
@@ -166,11 +178,11 @@
     .app__card-feedback--muted{ color:var(--muted) }
     .app__card-exp{
       margin-top:var(--s-2); padding:10px 12px; border:1px dashed var(--border);
-      border-radius:10px; color:var(--muted); background:#0e1630; display:none
+      border-radius:10px; color:var(--muted); background:#0e1630; display:none;
     }
 
     /* --------------------------------------------------------
-       Modificadores de modo (sobre el contenedor raíz)
+       Modificadores de modo (sobre contenedor raíz)
        -------------------------------------------------------- */
     .app--exam .app__card-actions{ display:none }
     .app--exam .app__card-exp{ display:none !important }
@@ -181,7 +193,7 @@
     .app--exam.app--finished .app__card input[type="radio"]{ pointer-events:none }
 
     /* --------------------------------------------------------
-       Breakpoints Responsive
+       Breakpoints responsive
        -------------------------------------------------------- */
     @media (max-width: 900px){
       .app__header{ flex-direction:column; align-items:flex-start }
@@ -196,7 +208,6 @@
       .app__stats{ justify-content:center }
       .app__panel-row{ flex-direction:column; align-items:stretch }
       .app__panel-input, .app__panel-textarea, select{ width:100% }
-      .app__card-options{ grid-template-columns:1fr }
       .app__card-hint{ display:none }
     }
     @media (max-width: 420px){
@@ -217,7 +228,7 @@
        ========================================================= -->
   <div class="app" id="app">
 
-    <!-- ========= Cabecera (sticky) ========= -->
+    <!-- ========= Cabecera (sticky solo escritorio) ========= -->
     <header class="app__header app__header--sticky">
       <div>
         <h1 class="app__title">ESTUDIANT</h1>
@@ -247,14 +258,17 @@
           <button id="btn-load-file" class="app__btn app__btn--accent">Cargar archivo JSON</button>
           <span class="app__panel-hint">Recomendado para uso offline (PC/Mac).</span>
         </div>
-        <textarea id="txt-json" class="app__panel-textarea" placeholder='[ { "q":"Pregunta...", "opts":["A","B","C","D"], "ans":0, "exp":"..." } ]'></textarea>
+
+        <textarea id="txt-json" class="app__panel-textarea"
+          placeholder='[ { "q":"Pregunta...", "opts":["A","B","C","D"], "ans":0, "exp":"Explicación..." } ]'></textarea>
+
         <div class="app__panel-row">
           <button id="btn-load-text" class="app__btn app__btn--ok">Cargar JSON pegado</button>
         </div>
       </div>
     </details>
 
-    <!-- ========= Panel: Catálogo (lee MATERIAS/catalog.json) ========= -->
+    <!-- ========= Panel: Catálogo (MATERIAS/catalog.json) ========= -->
     <details class="app__panel" id="panel-catalog">
       <summary class="app__panel-summary">Materias del repositorio</summary>
       <div class="app__panel-body">
@@ -265,7 +279,7 @@
         </div>
         <div class="app__panel-row">
           <span class="app__panel-hint">
-            Se lee <code>MATERIAS/catalog.json</code> desde tu sitio. Añade/borra bancos en esa lista.
+            Se lee <code>MATERIAS/catalog.json</code> desde tu sitio (Netlify/Vercel).
           </span>
         </div>
       </div>
@@ -294,7 +308,7 @@
       </div>
     </details>
 
-    <!-- ========= Panel: Resumen de importación CSV ========= -->
+    <!-- ========= Panel: Resumen importación CSV ========= -->
     <details class="app__panel" id="panel-csv" style="display:none">
       <summary class="app__panel-summary">Resultado de la importación CSV</summary>
       <div class="app__panel-body" id="csv-summary"></div>
@@ -313,19 +327,19 @@
 
     <!-- ========= Pie ========= -->
     <footer class="app__footer">
-      Para iPhone/iPad, sirve la carpeta en Netlify/Vercel y añade a pantalla de inicio desde Safari.
-      Para PC/Mac, funciona local con doble clic (Chrome/Brave recomendados).
+      iPhone/iPad: sirve la carpeta en Netlify/Vercel y añade a pantalla de inicio desde Safari.
+      PC/Mac: funciona local con doble clic (Chrome/Brave recomendados).
     </footer>
 
-  </div> <!-- /.app -->
+  </div> <!-- / .app -->
 
-  <!-- ========== JavaScript (IIFE + comentarios) ========== -->
+  <!-- ========== JavaScript (IIFE con comentarios) ========== -->
   <script>
   (function(){
     'use strict';
 
     /* ========================================================
-       Polyfills mínimos (compatibilidad Safari/iOS antiguos)
+       Polyfills mínimos (compatibilidad)
        ======================================================== */
     if(!Element.prototype.matches){
       Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
@@ -342,11 +356,11 @@
     }
 
     /* ========================================================
-       Utilidades genéricas
+       Utilidades
        ======================================================== */
     const $  = (s) => document.querySelector(s);
     const $$ = (s) => Array.from(document.querySelectorAll(s));
-    const L  = ['A','B','C','D']; // Letras para opciones
+    const L  = ['A','B','C','D'];
 
     const now = () => Date.now();
     const pad2 = (n) => String(n).padStart(2,'0');
@@ -355,13 +369,12 @@
     function shuffle(a){
       for(let i=a.length-1;i>0;i--){
         const j=Math.floor(Math.random()*(i+1));
-        [a[i],a[j]] = [a[j],a[i]];
+        [a[i],a[j]]=[a[j],a[i]];
       }
       return a;
     }
 
     function fp(obj){
-      // Huella simple para detectar cambios de dataset
       try{
         const s=JSON.stringify(obj);
         let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; }
@@ -370,7 +383,6 @@
     }
 
     function download(name, text){
-      // Descarga un archivo de texto en el navegador
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
       a.download = name;
@@ -382,16 +394,16 @@
        Claves de almacenamiento (localStorage)
        ======================================================== */
     const KEY = {
-      state : 'app_state_v3',
-      data  : 'app_data_v3',
-      labels: 'app_labels_v3'
+      state : 'app_state_v5',
+      data  : 'app_data_v5',
+      labels: 'app_labels_v5'
     };
 
     /* ========================================================
        Referencias DOM
        ======================================================== */
-    const $root = $('#app');
-    const $list = $('#list');
+    const $root  = $('#app');
+    const $list  = $('#list');
     const $pillS = $('#pill-score');
     const $pillT = $('#pill-timer');
     const $pillD = $('#pill-dataset');
@@ -418,26 +430,20 @@
     ];
 
     /* ========================================================
-       Estado de la aplicación
+       Estado de la app
        ======================================================== */
-    let EXAM    = [];           // Banco de preguntas activo
-    let EXAM_FP = 'fp_0';       // Huella del banco
-    let order   = [];           // Índice del EXAM en cada posición visible
-    let answers = [];           // Respuesta elegida (índice 0–3) por posición
-    let result  = [];           // true/false/null por posición
+    let EXAM    = [];
+    let EXAM_FP = 'fp_0';
+    let order   = [];
+    let answers = [];
+    let result  = [];
 
-    let labelsMode = localStorage.getItem(KEY.labels) || 'examen'; // 'examen'|'repaso'
+    let labelsMode = localStorage.getItem(KEY.labels) || 'examen'; // 'examen' | 'repaso'
     let mode = { isExam:false, running:false, finished:false, durationMs:0, endAt:0, timer:null };
 
     /* ========================================================
-       Renderizado de tarjetas de pregunta
+       Renderizado de tarjetas
        ======================================================== */
-    /**
-     * Renderiza todas las tarjetas en el contenedor #list
-     * @param {Object} opts
-     * @param {boolean} opts.shuffleOptions - Mezcla las opciones dentro de cada tarjeta
-     * @param {boolean} opts.resetOrder - Regenera 'order' a 0..n-1
-     */
     function render({ shuffleOptions=false, resetOrder=true } = {}){
       if(resetOrder) order = EXAM.map((_,i)=>i);
       $list.innerHTML = '';
@@ -457,24 +463,19 @@
             <span class="app__card-tag">Pregunta ${vi+1}</span>
             <span class="app__card-tag">Opciones: 4</span>
           </div>
-
           <p class="app__card-title">${it.q}</p>
-
           <div class="app__card-options">
             ${opts.map((op,k)=>`
               <label class="app__card-option">
                 <input type="radio" name="q${vi}" value="${op.i}">
                 <div><strong>${L[k]}.</strong> ${op.t}</div>
-              </label>
-            `).join('')}
+              </label>`).join('')}
           </div>
-
           <div class="app__card-actions">
             <button class="app__btn app__btn--ok"  data-action="check">Comprobar</button>
             <button class="app__btn app__btn--warn" data-action="clear">Limpiar</button>
-            <span class="app__card-hint">Responde y usa “Comprobar” para ver la explicación.</span>
+            <span class="app__card-hint">Responde y usa “Comprobar”.</span>
           </div>
-
           <div class="app__card-feedback app__card-feedback--muted" aria-live="polite">Sin responder.</div>
           <div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>
         `;
@@ -484,15 +485,9 @@
 
       answers = Array(EXAM.length).fill(null);
       result  = Array(EXAM.length).fill(null);
-
       updateStats();
     }
 
-    /**
-     * Corrige una tarjeta concreta (vi) y muestra feedback.
-     * @param {HTMLElement} card - Tarjeta .app__card
-     * @param {boolean} reveal - Forzar mostrar solución (final de examen)
-     */
     function checkCard(card, reveal=false){
       const vi  = Number(card.dataset.viewIndex);
       const oi  = Number(card.dataset.origIndex);
@@ -516,22 +511,20 @@
       answers[vi] = chosen;
       if(!mode.isExam || reveal) result[vi] = ok;
 
-      // Limpia marcas anteriores
       boxes.forEach(b=>b.classList.remove('app__card-option--correct','app__card-option--wrong'));
       card.classList.remove('app__card--ok','app__card--bad');
 
-      // Marca la correcta (y la elegida errónea si procede)
       boxes.forEach(b=>{
         const v = Number(b.querySelector('input').value);
         if(v === it.ans && (!mode.isExam || reveal)){
           b.classList.add('app__card-option--correct');
         }
       });
+
       if(!ok && (!mode.isExam || reveal)){
         sel.closest('.app__card-option').classList.add('app__card-option--wrong');
       }
 
-      // Feedback / explicación
       if(!mode.isExam || reveal){
         fb.className = ok ? 'app__card-feedback app__card-feedback--ok' : 'app__card-feedback app__card-feedback--bad';
         fb.textContent = ok ? '¡Correcto!' : `Incorrecto. Respuesta correcta: "${it.opts[it.ans]}".`;
@@ -547,7 +540,6 @@
       updateStats();
     }
 
-    /** Limpia una tarjeta (vi) a estado inicial */
     function clearCard(card){
       const vi = Number(card.dataset.viewIndex);
 
@@ -568,38 +560,30 @@
       updateStats();
     }
 
-    /** Actualiza contadores de estado (píldoras) */
+    /* ========================================================
+       Acciones globales
+       ======================================================== */
     function updateStats(){
       const ok = result.filter(v=>v===true).length;
       $pillS.textContent = `Aciertos: ${ok} / ${EXAM.length}`;
       $pillD.textContent = `Dataset: ${EXAM_FP===fp(DEFAULT_EXAM) ? 'por defecto' : 'personalizado'}`;
     }
 
-    /** Corrige todo (en repaso) o revela todo (al finalizar examen) */
     function checkAll(){ $$('.app__card').forEach(c=>checkCard(c, mode.isExam)); saveState(); }
-
-    /** Limpia todas las tarjetas (respuestas y feedback) */
     function resetAll(){ $$('.app__card').forEach(clearCard); saveState(); }
-
-    /** Mezcla el orden de preguntas visibles */
     function shuffleAll(){ order = shuffle(order); render({ shuffleOptions:true, resetOrder:false }); saveState(); }
 
     /* ========================================================
        Modo repaso/examen + temporizador
        ======================================================== */
     function setPracticeDisabled(d){
-      // Desactiva acciones que no se deben usar mientras el examen está corriendo
       $('#btn-shuffle').disabled   = d;
       $('#btn-check-all').disabled = d;
       $('#btn-reset').disabled     = d;
-
-      // Impedir cambiar dataset mientras corre el examen
       $('#btn-load-file').disabled = d;
       $('#btn-load-text').disabled = d;
       $('#file-json').disabled     = d;
       $('#txt-json').disabled      = d;
-
-      // CSV
       $('#btn-import-csv').disabled= d;
       $('#file-csv').disabled      = d;
     }
@@ -635,7 +619,6 @@
 
       stopTimer();
 
-      // Muestra soluciones y bloquea inputs
       $$('.app__card').forEach(c=> checkCard(c, true));
       $$('.app__card input[type="radio"]').forEach(i=> i.disabled = true);
 
@@ -677,12 +660,10 @@
        Persistencia (localStorage)
        ======================================================== */
     function saveData(){
-      // Guarda el dataset activo
       try{ localStorage.setItem(KEY.data, JSON.stringify({ fp:EXAM_FP, exam:EXAM })); }catch{}
     }
 
     function loadData(){
-      // Carga dataset si existe
       try{
         const raw = localStorage.getItem(KEY.data);
         if(!raw) return null;
@@ -692,7 +673,6 @@
     }
 
     function saveState(){
-      // Guarda estado de orden, respuestas, modo, etiquetas
       try{
         localStorage.setItem(KEY.state, JSON.stringify({
           fp:EXAM_FP, order, answers, result,
@@ -703,13 +683,12 @@
     }
 
     function loadState(){
-      // Reconstruye interfaz a partir del estado guardado (si coincide la huella del dataset)
       try{
         const raw = localStorage.getItem(KEY.state);
         if(!raw) return false;
 
         const o = JSON.parse(raw);
-        if(!o || o.fp !== EXAM_FP) return false; // Dataset cambió
+        if(!o || o.fp !== EXAM_FP) return false;
 
         if(o.labels){ labelsMode = o.labels; applyLabels(); }
 
@@ -717,7 +696,7 @@
         answers = Array.isArray(o.answers) ? o.answers.slice() : Array(EXAM.length).fill(null);
         result  = Array.isArray(o.result)  ? o.result.slice()  : Array(EXAM.length).fill(null);
 
-        // Render sin barajar (respetando 'order')
+        // Render respetando el orden persistido
         $list.innerHTML = '';
         order.forEach((oi,vi)=>{
           const it = EXAM[oi];
@@ -739,8 +718,7 @@
                 <label class="app__card-option">
                   <input type="radio" name="q${vi}" value="${op.i}">
                   <div><strong>${L[k]}.</strong> ${op.t}</div>
-                </label>
-              `).join('')}
+                </label>`).join('')}
             </div>
             <div class="app__card-actions">
               <button class="app__btn app__btn--ok" data-action="check">Comprobar</button>
@@ -750,11 +728,10 @@
             <div class="app__card-feedback app__card-feedback--muted" aria-live="polite">Sin responder.</div>
             <div class="app__card-exp"><strong>Explicación:</strong> ${it.exp}</div>
           `;
-
           $list.appendChild(card);
         });
 
-        // Restaura selecciones
+        // Selecciones persistidas
         answers.forEach((v,vi)=>{
           if(v!==null){
             const input = document.querySelector(`.app__card[data-view-index="${vi}"] input[value="${v}"]`);
@@ -762,7 +739,7 @@
           }
         });
 
-        // Restaura modo y, si procede, temporizador o soluciones
+        // Restaura modo
         if(o.mode){
           mode.isExam   = !!o.mode.isExam;
           mode.running  = !!o.mode.running;
@@ -783,7 +760,6 @@
               else startTimer();
             }
           }else{
-            // Repaso: si ya había corrección, muéstrala
             result.forEach((r,vi)=>{
               if(r!==null){
                 const card = document.querySelector(`.app__card[data-view-index="${vi}"]`);
@@ -835,104 +811,80 @@
       EXAM    = newExam;
       EXAM_FP = fp(EXAM);
       $pillD.textContent = `Dataset: ${label}`;
-      resetMode();       // Limpia estados del modo y re-renderiza
-      saveData();       // Guarda el banco
-      saveState();      // Guarda estado general
+      resetMode();
+      saveData();
+      saveState();
     }
 
     /* ========================================================
        Exportar / Importar CSV (calificar respuestas)
        ======================================================== */
     function exportCSV(){
-      const rows = [];
-      rows.push([
-        '#','Pregunta','Elegida (letra)','Elegida (texto)',
-        'Correcta (letra)','Correcta (texto)','¿Correcta?','¿Corregida?'
-      ].join(','));
+      const rows=[['#','Pregunta','Elegida (letra)','Elegida (texto)','Correcta (letra)','Correcta (texto)','¿Correcta?','¿Corregida?'].join(',')];
 
       $$('.app__card').forEach((card,vi)=>{
-        const oi = Number(card.dataset.origIndex);
-        const it = EXAM[oi];
-
-        // Mapa índice original -> letra/texto según DOM actual
-        const map = {};
+        const oi=Number(card.dataset.origIndex), it=EXAM[oi], map={};
         [...card.querySelectorAll('.app__card-option')].forEach((box,k)=>{
-          const idx = Number(box.querySelector('input').value);
-          const txt = box.querySelector('div').innerText.replace(/^[A-D]\.\s*/, '');
-          map[idx]  = { letter:L[k], text:txt };
+          const idx=Number(box.querySelector('input').value);
+          const txt=box.querySelector('div').innerText.replace(/^[A-D]\.\s*/, '');
+          map[idx]={letter:L[k], text:txt};
         });
 
-        const chosen = answers[vi];
-        const chInfo = chosen===null ? {letter:'', text:''} : (map[chosen] || {letter:'', text:''});
-
-        const coIdx  = it.ans;
-        const coInfo = map[coIdx] || {letter:'', text: it.opts[coIdx] || ''};
-
-        const ok = result[vi];
-        const ev = result[vi] !== null;
+        const chosen=answers[vi];
+        const ch=chosen===null?{letter:'',text:''}:(map[chosen]||{letter:'',text:''});
+        const co=map[it.ans]||{letter:'',text:it.opts[it.ans]||''};
+        const ok=result[vi], ev=result[vi]!==null;
 
         rows.push([
           vi+1,
           `"${it.q.replace(/"/g,'""')}"`,
-          chInfo.letter,
-          `"${(chInfo.text||'').replace(/"/g,'""')}"`,
-          coInfo.letter,
-          `"${(coInfo.text||'').replace(/"/g,'""')}"`,
-          ok===true ? 'Sí' : (ok===false ? 'No' : ''),
-          ev ? 'Sí' : 'No'
+          ch.letter,
+          `"${(ch.text||'').replace(/"/g,'""')}"`,
+          co.letter,
+          `"${(co.text||'').replace(/"/g,'""')}"`,
+          ok===true?'Sí':(ok===false?'No':''),
+          ev?'Sí':'No'
         ].join(','));
       });
 
-      const ts = new Date().toISOString().replace(/[:T]/g,'-').split('.')[0];
+      const ts=new Date().toISOString().replace(/[:T]/g,'-').split('.')[0];
       download(`examen_${ts}.csv`, rows.join('\n'));
     }
 
     function parseCSV(text){
-      // Parser simple de CSV con comillas
       const rows=[]; let row=[], cell='', q=false;
       for(let i=0;i<text.length;i++){
         const ch=text[i], nx=text[i+1];
-        if(q){
-          if(ch==='"'&&nx==='"'){ cell+='"'; i++; }
-          else if(ch==='"'){ q=false; }
-          else cell+=ch;
-        }else{
-          if(ch==='"'){ q=true; }
-          else if(ch===','){ row.push(cell); cell=''; }
-          else if(ch==='\n'){ row.push(cell); rows.push(row); row=[]; cell=''; }
-          else if(ch!=='\r'){ cell+=ch; }
-        }
+        if(q){ if(ch==='"'&&nx==='"'){cell+='"';i++;} else if(ch==='"'){q=false;} else cell+=ch; }
+        else{ if(ch==='"'){q=true;} else if(ch===','){row.push(cell);cell='';} else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';} else if(ch!=='\r'){cell+=ch;} }
       }
-      if(cell.length || row.length){ row.push(cell); rows.push(row); }
-      return rows;
+      if(cell.length||row.length){row.push(cell);rows.push(row);} return rows;
     }
 
     function summarizeCSV(text){
-      // Muestra resumen de calificación a partir de un CSV exportado o una lista A–D
       $panelCSV.style.display='block';
       $sumCSV.innerHTML='';
 
-      const rows = parseCSV(text.trim());
+      const rows=parseCSV(text.trim());
       if(!rows.length){ $sumCSV.textContent='CSV vacío.'; return; }
 
-      const header = rows[0].map(h=>h.trim().toLowerCase());
-      const data   = rows.slice(1);
+      const header=rows[0].map(h=>h.trim().toLowerCase());
+      const data  =rows.slice(1);
 
-      const iCh = header.findIndex(h=>h.includes('elegida')  && h.includes('letra'));
-      const iCo = header.findIndex(h=>h.includes('correcta') && h.includes('letra'));
+      const iCh=header.findIndex(h=>h.includes('elegida')&&h.includes('letra'));
+      const iCo=header.findIndex(h=>h.includes('correcta')&&h.includes('letra'));
 
       let total=0, correct=0, answered=0;
       const fails=[];
 
-      // Formato 1: CSV exportado por la app (tiene columnas de letras)
       if(iCh!==-1 && iCo!==-1){
         data.forEach((r,i)=>{
           const ch=(r[iCh]||'').trim().toUpperCase();
           const co=(r[iCo]||'').trim().toUpperCase();
           if(['A','B','C','D'].includes(ch)) answered++;
-          if(ch && co && ch===co) correct++;
+          if(ch&&co&&ch===co) correct++;
           total++;
-          if(ch && co && ch!==co) fails.push({ n:i+1, ch, co });
+          if(ch&&co&&ch!==co) fails.push({n:i+1,ch,co});
         });
 
         $sumCSV.innerHTML = `
@@ -943,28 +895,19 @@
         return;
       }
 
-      // Formato 2: lista simple A–D (por línea/espacios/comas)
-      const tokens = text.toUpperCase().match(/[A-D]/g) || [];
-      total = EXAM.length;
-
-      if(!tokens.length){
-        $sumCSV.innerHTML = `
-          <p>No se detectaron respuestas (A–D).</p>
-          <ul>
-            <li>Importa el CSV exportado por la app</li>
-            <li>O pega una lista simple de letras (A–D)</li>
-          </ul>
-        `;
+      const toks=text.toUpperCase().match(/[A-D]/g)||[];
+      total=EXAM.length;
+      if(!toks.length){
+        $sumCSV.innerHTML = `<p>No se detectaron respuestas (A–D).</p>`;
         return;
       }
 
-      tokens.slice(0,total).forEach((ch,i)=>{
-        const oi  = order[i];
-        const coL = L[EXAM[oi].ans];
-        if(ch===coL) correct++; else fails.push({ n:i+1, ch, co:coL });
+      toks.slice(0,total).forEach((ch,i)=>{
+        const oi=order[i], coL=L[EXAM[oi].ans];
+        if(ch===coL) correct++; else fails.push({n:i+1, ch, co:coL});
       });
 
-      answered = Math.min(tokens.length,total);
+      answered=Math.min(toks.length,total);
       $sumCSV.innerHTML = `
         <p><strong>Formato:</strong> lista simple (A–D).</p>
         <p><em>Ojo:</em> califica según el <strong>orden visible</strong>.</p>
@@ -992,52 +935,39 @@
        Catálogo (MATERIAS/catalog.json)
        ======================================================== */
     async function fetchCatalog(){
-      // cache: 'no-store' evita que Safari muestre una versión cacheada
       const res = await fetch('MATERIAS/catalog.json', { cache:'no-store' });
       if(!res.ok) throw new Error(`No se pudo cargar catalog.json (${res.status})`);
       return await res.json();
     }
-
     function populateCatalog(items){
       const sel = $('#catalog-select');
       sel.innerHTML = '';
-
       if(!Array.isArray(items) || !items.length){
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'No hay materias en el catálogo';
-        sel.appendChild(opt);
-        return;
+        const opt=document.createElement('option');
+        opt.value=''; opt.textContent='No hay materias en el catálogo';
+        sel.appendChild(opt); return;
       }
-
       items.forEach(item=>{
-        const opt = document.createElement('option');
-        opt.value = item.file;                         // p.ej., "MATERIAS/economia.json"
-        opt.textContent = item.title || item.id || item.file;
+        const opt=document.createElement('option');
+        opt.value=item.file; opt.textContent=item.title || item.id || item.file;
         sel.appendChild(opt);
       });
     }
-
     async function loadCatalogIntoSelect(){
-      try{
-        const catalog = await fetchCatalog();
-        populateCatalog(catalog);
-      }catch(e){
+      try{ const catalog=await fetchCatalog(); populateCatalog(catalog); }
+      catch(e){
         console.warn(e);
-        const sel = $('#catalog-select');
-        sel.innerHTML = '';
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Error al leer catalog.json';
+        const sel=$('#catalog-select');
+        sel.innerHTML='';
+        const opt=document.createElement('option');
+        opt.value=''; opt.textContent='Error al leer catalog.json';
         sel.appendChild(opt);
       }
     }
-
     async function loadSelectedDataset(){
       const sel  = $('#catalog-select');
       const file = sel.value;
       if(!file){ alert('No hay materia seleccionada.'); return; }
-
       try{
         const res = await fetch(file, { cache:'no-store' });
         if(!res.ok) throw new Error(`No se pudo cargar ${file} (${res.status})`);
@@ -1050,29 +980,29 @@
     }
 
     /* ========================================================
-       Enlace de eventos y arranque
+       Enlaces de eventos y arranque
        ======================================================== */
     document.addEventListener('DOMContentLoaded', ()=>{
-      // Carga dataset guardado o el de muestra
+      // Carga dataset persistido o el de muestra
       const saved = loadData();
-      if(saved){ EXAM = saved.exam; EXAM_FP = fp(EXAM); $pillD.textContent='Dataset: restaurado'; }
-      else     { EXAM = DEFAULT_EXAM; EXAM_FP = fp(EXAM); $pillD.textContent='Dataset: por defecto'; }
+      if(saved){ EXAM=saved.exam; EXAM_FP=fp(EXAM); $pillD.textContent='Dataset: restaurado'; }
+      else     { EXAM=DEFAULT_EXAM; EXAM_FP=fp(EXAM); $pillD.textContent='Dataset: por defecto'; }
 
-      // Aplica etiquetas, renderiza y restaura estado si coincide la huella
+      // Inicializa UI
       applyLabels();
       render({ shuffleOptions:false, resetOrder:true });
       loadState();
 
-      // Delegación para botones de cada tarjeta
+      // Delegación: acciones en tarjetas
       $list.addEventListener('click', (e)=>{
         const btn  = e.target.closest('button');
         const card = e.target.closest('.app__card');
         if(!btn || !card) return;
-        if(btn.dataset.action === 'check') checkCard(card);
-        if(btn.dataset.action === 'clear') clearCard(card);
+        if(btn.dataset.action==='check') checkCard(card);
+        if(btn.dataset.action==='clear') clearCard(card);
       });
 
-      // Guardar elección al cambiar
+      // Guardar selección al cambiar
       $list.addEventListener('change', (e)=>{
         const inp  = e.target.closest('input[type="radio"]');
         const card = e.target.closest('.app__card');
@@ -1088,9 +1018,7 @@
       $('#btn-reset').addEventListener('click', resetAll);
       $('#btn-export').addEventListener('click', exportCSV);
       $('#btn-clear').addEventListener('click', ()=>{
-        if(confirm('¿Borrar estado y dataset guardados?')){
-          clearAll(); location.reload();
-        }
+        if(confirm('¿Borrar estado y dataset guardados?')){ clearAll(); location.reload(); }
       });
       $('#btn-swap-label').addEventListener('click', swapLabels);
 
@@ -1099,9 +1027,13 @@
         const f = $('#file-json').files?.[0];
         if(!f) return alert('Selecciona un archivo JSON.');
         try{
-          const json = await readJSONFile(f);
-          const err  = validateJSON(json);
-          if(err) throw new Error(err);
+          const json = await (new Promise((res,rej)=>{
+            const r=new FileReader();
+            r.onload = ()=>{ try{ res(JSON.parse(String(r.result))); }catch(e){ rej(e); } };
+            r.onerror= ()=> rej(r.error || new Error('No se pudo leer.'));
+            r.readAsText(f,'utf-8');
+          }));
+          const err = validateJSON(json); if(err) throw new Error(err);
           setDataset(json, f.name || 'archivo');
           alert('Dataset cargado.');
         }catch(e){ alert('Error: '+e.message); }
@@ -1112,14 +1044,13 @@
         if(!raw) return alert('Pega JSON en el cuadro.');
         try{
           const json = JSON.parse(raw);
-          const err  = validateJSON(json);
-          if(err) throw new Error(err);
+          const err  = validateJSON(json); if(err) throw new Error(err);
           setDataset(json,'pegado');
           alert('Dataset cargado.');
         }catch(e){ alert('JSON inválido: '+e.message); }
       });
 
-      // Modo examen/repaso
+      // Modos
       $('#btn-start').addEventListener('click', startExam);
       $('#btn-finish').addEventListener('click', finishExam);
       $('#btn-resetmode').addEventListener('click', resetMode);
@@ -1128,10 +1059,9 @@
       const fileCSV = $('#file-csv');
       $('#btn-import-csv').addEventListener('click', ()=>{ fileCSV.value=''; fileCSV.click(); });
       fileCSV.addEventListener('change', ()=>{
-        const f = fileCSV.files && fileCSV.files[0];
-        if(!f) return;
-        const r = new FileReader();
-        r.onload  = ()=> summarizeCSV(String(r.result || ''));
+        const f=fileCSV.files&&fileCSV.files[0]; if(!f) return;
+        const r=new FileReader();
+        r.onload  = ()=> summarizeCSV(String(r.result||'')); 
         r.onerror = ()=> alert('No se pudo leer el CSV.');
         r.readAsText(f,'utf-8');
       });
