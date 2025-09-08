@@ -1,0 +1,122 @@
+[
+    {
+      "q": "La densidad de población se calcula como",
+      "opts": ["Población/PIB", "PIB/Población", "Población/Superficie", "Superficie/Población"],
+      "ans": 2,
+      "exp": "Hab./km² = población dividida por superficie."
+    },
+    {
+      "q": "Crecimiento natural de la población =",
+      "opts": ["Natalidad − Mortalidad", "Natalidad + Inmigración", "Mortalidad − Emigración", "Saldo migratorio"],
+      "ans": 0,
+      "exp": "Crec. natural = nacimientos − defunciones."
+    },
+    {
+      "q": "Una pirámide poblacional con base estrecha y cúspide ancha indica",
+      "opts": ["Alta natalidad", "Envejecimiento de la población", "Explosión demográfica", "Migración masiva de jóvenes"],
+      "ans": 1,
+      "exp": "Pocos nacimientos y alta proporción de mayores."
+    },
+    {
+      "q": "El clima mediterráneo típico presenta",
+      "opts": ["Veranos secos y calurosos", "Inviernos muy fríos y secos", "Lluvias todo el año", "Monzones de verano"],
+      "ans": 0,
+      "exp": "Sequía estival característica, lluvias en otoño-primavera."
+    },
+    {
+      "q": "La Corriente del Golfo",
+      "opts": ["Enfría Europa occidental", "Calienta Europa occidental", "No afecta a Europa", "Solo afecta al Pacífico"],
+      "ans": 1,
+      "exp": "Corriente cálida del Atlántico norte."
+    },
+    {
+      "q": "Un proceso de ‘deslocalización’ industrial corresponde a",
+      "opts": ["Mudanza de capital al campo", "Traslado de la producción a países con menores costes", "Aumento de salarios", "Nacionalización de empresas"],
+      "ans": 1,
+      "exp": "Búsqueda de costes laborales/fiscales más bajos."
+    },
+    {
+      "q": "Sector que incluye comercio y transporte",
+      "opts": ["Primario", "Secundario", "Terciario", "Cuaternario"],
+      "ans": 2,
+      "exp": "Servicios (terciario)."
+    },
+    {
+      "q": "Proyección de Mercator se caracteriza por",
+      "opts": ["Áreas exactas", "Formas conservadas y áreas distorsionadas en altas latitudes", "Formas distorsionadas y áreas exactas", "Iguales distancias"],
+      "ans": 1,
+      "exp": "Conserva ángulos, distorsiona áreas cercanas a los polos."
+    },
+    {
+      "q": "El huso horario cambia 1 hora por cada",
+      "opts": ["10° de longitud", "12°", "15°", "20°"],
+      "ans": 2,
+      "exp": "360°/24h = 15° por hora."
+    },
+    {
+      "q": "Bioma de coníferas de latitudes altas",
+      "opts": ["Sabana", "Taiga", "Tundra", "Bosque mediterráneo"],
+      "ans": 1,
+      "exp": "La taiga domina en Canadá, Siberia, etc."
+    },
+    {
+      "q": "La cuenca hidrográfica del Ebro desagua en",
+      "opts": ["Océano Atlántico", "Mar Cantábrico", "Mar Mediterráneo", "Mar del Norte"],
+      "ans": 2,
+      "exp": "El Ebro desemboca en el Mediterráneo."
+    },
+    {
+      "q": "La Meseta es un rasgo del relieve",
+      "opts": ["Alemán", "Español", "Italiano", "Polaco"],
+      "ans": 1,
+      "exp": "La Meseta Central es característica de España."
+    },
+    {
+      "q": "Energía renovable",
+      "opts": ["Carbón", "Petróleo", "Eólica", "Nuclear de fisión"],
+      "ans": 2,
+      "exp": "El viento es recurso renovable."
+    },
+    {
+      "q": "La urbanización se asocia a",
+      "opts": ["Aumento del sector primario", "Crecimiento de población en áreas urbanas", "Disminución de servicios", "Desruralización del sector terciario"],
+      "ans": 1,
+      "exp": "Migración campo‑ciudad + crecimiento de ciudades."
+    },
+    {
+      "q": "Climograma con máximos pluviométricos en otoño y primavera y sequía estival corresponde a",
+      "opts": ["Oceánico", "Mediterráneo", "Continental húmedo", "Ecuatorial"],
+      "ans": 1,
+      "exp": "Patrón típico mediterráneo."
+    },
+    {
+      "q": "Relieve alpino se refiere a",
+      "opts": ["Relieves antiguos y aplanados", "Sistemas montañosos jóvenes y elevados", "Llanuras aluviales", "Mesas y buttes"],
+      "ans": 1,
+      "exp": "Cadenas montañosas jóvenes (Alpes, Pirineos)."
+    },
+    {
+      "q": "El saldo migratorio es",
+      "opts": ["Nacimientos − defunciones", "Inmigrantes − emigrantes", "Población activa − parada", "Crecimiento total − crecimiento natural"],
+      "ans": 1,
+      "exp": "Entrada menos salida de población."
+    },
+    {
+      "q": "El fenómeno ENSO (El Niño) afecta principalmente a",
+      "opts": ["Atlántico norte", "Pacífico ecuatorial", "Índico occidental", "Ártico"],
+      "ans": 1,
+      "exp": "Alteraciones térmicas y de precipitación en el Pacífico ecuatorial."
+    },
+    {
+      "q": "Agricultura intensiva se caracteriza por",
+      "opts": ["Baja inversión por hectárea", "Alto rendimiento por superficie", "Bajo uso de insumos", "Amplias superficies extensivas"],
+      "ans": 1,
+      "exp": "Más insumos, más capital, mayor productividad por ha."
+    },
+    {
+      "q": "El clima oceánico en Europa occidental presenta",
+      "opts": ["Lluvias escasas y veranos secos", "Lluvias abundantes y regulares, temperaturas suaves", "Inviernos muy fríos y secos", "Monzones fuertes de verano"],
+      "ans": 1,
+      "exp": "Régimen de lluvias distribuido, amplitud térmica moderada."
+    }
+  ]
