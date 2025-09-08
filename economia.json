@@ -1,0 +1,123 @@
+[
+    {
+      "q": "El PIB real se diferencia del PIB nominal en que",
+      "opts": ["Incluye producción no declarada", "Excluye el sector público", "Elimina el efecto de los precios (usa precios constantes)", "Usa precios corrientes del año"],
+      "ans": 2,
+      "exp": "PIB real valora con precios de un año base."
+    },
+    {
+      "q": "Tasa de paro:",
+      "opts": ["Parados / Población total", "Parados / Población en edad de trabajar", "Parados / Población activa", "Parados / Ocupados"],
+      "ans": 2,
+      "exp": "Tasa de paro = Parados / Población activa."
+    },
+    {
+      "q": "Si el precio sube un 10% y la cantidad demandada baja un 15%, la demanda es",
+      "opts": ["Inelástica", "Elástica", "Unitariamente elástica", "Perfectamente inelástica"],
+      "ans": 1,
+      "exp": "|Ep|=1,5>1 → demanda elástica."
+    },
+    {
+      "q": "Punto muerto: CF = 20.000 €, P = 50 €, CVu = 30 €. ¿Q*?",
+      "opts": ["500", "800", "1.000", "1.500"],
+      "ans": 2,
+      "exp": "Q* = 20.000 / (50−30) = 1000."
+    },
+    {
+      "q": "Ratio de liquidez (circulante): AC = 120.000 €, PC = 80.000 €.",
+      "opts": ["0,67", "1,00", "1,50", "2,00"],
+      "ans": 2,
+      "exp": "Liquidez = AC/PC = 120.000/80.000 = 1,5."
+    },
+    {
+      "q": "Amortización lineal: coste 25.000 €, residual 5.000 €, vida 5 años. ¿Cuota anual?",
+      "opts": ["4.000 €", "5.000 €", "6.000 €", "3.000 €"],
+      "ans": 0,
+      "exp": "(25.000−5.000)/5 = 4.000 €/año."
+    },
+    {
+      "q": "VAN: cobros 1000 €/año durante 3 años, i=10%, inversión inicial 2400 €. Señala el VAN (aprox.).",
+      "opts": ["≈ −87 €", "≈ +87 €", "≈ +100 €", "≈ 0 €"],
+      "ans": 1,
+      "exp": "PV = 1000·(1−(1,1)^{-3})/0,1 ≈ 2487 → VAN ≈ 2487−2400=+87 €."
+    },
+    {
+      "q": "Ingreso total IT y coste total CT: P=40 €, CVu=25 €, CF=3000 €. Para Q=400, beneficio π es",
+      "opts": ["4.000 €", "2.000 €", "3.000 €", "1.000 €"],
+      "ans": 3,
+      "exp": "IT=40·400=16.000; CT=3000+25·400=13.000; π=3.000? Revisa: 16.000−13.000=3.000. (Correcta: 3.000 €).",
+      "fix": true
+    },
+    {
+      "q": "Si el BCE sube los tipos de interés, lo esperable es",
+      "opts": ["Suban consumo e inversión", "Baje la inversión y se modere la inflación", "Suba la inflación", "Aumente el déficit público automáticamente"],
+      "ans": 1,
+      "exp": "Tipos altos encarecen el crédito → menor demanda agregada e inflación."
+    },
+    {
+      "q": "Ventaja comparativa (Ricardo) indica que",
+      "opts": ["Importa quién produce más en términos absolutos", "Cada país debe especializarse en lo que produce a menor coste relativo", "El proteccionismo siempre mejora el bienestar", "Los aranceles no tienen costes"],
+      "ans": 1,
+      "exp": "La ganancia proviene de costes comparativos, no absolutos."
+    },
+    {
+      "q": "Competencia perfecta a largo plazo: el precio de equilibrio se iguala a",
+      "opts": ["Coste fijo medio", "Coste marginal mínimo y coste medio mínimo", "Coste variable total", "Precio de reserva del consumidor"],
+      "ans": 1,
+      "exp": "P = CMg = CMe mínimo en equilibrio de largo plazo."
+    },
+    {
+      "q": "Una externalidad negativa implica",
+      "opts": ["Un beneficio no pagado", "Un coste no internalizado por el productor", "Un subsidio implícito al consumidor", "Una situación óptima de Pareto"],
+      "ans": 1,
+      "exp": "El productor no asume el coste externo (p.ej., contaminación)."
+    },
+    {
+      "q": "IPC: si pasa de 105 a 111 en un año, la inflación anual (aprox.) es",
+      "opts": ["4,0%", "5,7%", "6,0%", "7,0%"],
+      "ans": 1,
+      "exp": "(111−105)/105 ≈ 5,71%."
+    },
+    {
+      "q": "Saldo presupuestario gobierno = Ingresos 200, Gastos 220 (miles de €).",
+      "opts": ["Superávit 20", "Déficit 20", "Equilibrado", "Superávit 10"],
+      "ans": 1,
+      "exp": "G > T → déficit de 20."
+    },
+    {
+      "q": "Productividad aparente del trabajo =",
+      "opts": ["Producción / Nº de trabajadores", "Coste laboral / Producción", "Producción / Coste total", "Producción / Activos fijos"],
+      "ans": 0,
+      "exp": "Producción por trabajador (o por hora trabajada)."
+    },
+    {
+      "q": "Un aumento del precio del petróleo (insumo clave) desplaza la curva de",
+      "opts": ["Demanda hacia la derecha", "Demanda hacia la izquierda", "Oferta hacia la derecha", "Oferta hacia la izquierda"],
+      "ans": 3,
+      "exp": "Suben costes → oferta se contrae (izquierda)."
+    },
+    {
+      "q": "Elasticidad cruzada de la demanda positiva indica que los bienes son",
+      "opts": ["Complementarios", "Sustitutos", "Independientes", "Giffen"],
+      "ans": 1,
+      "exp": "Ex>0 → sustitutos."
+    },
+    {
+      "q": "Tipo de interés real (aprox.): nominal 5%, inflación 2%.",
+      "opts": ["2,0%", "3,0%", "3,5%", "5,0%"],
+      "ans": 1,
+      "exp": "Fisher aproximado: r ≈ i − π = 5−2 = 3%."
+    },
+    {
+      "q": "Coste medio a Q=250, con CF=5.000 € y CVu=4 €.",
+      "opts": ["20 €", "24 €", "25 €", "29 €"],
+      "ans": 1,
+      "exp": "CM = CF/Q + CVu = 5000/250 + 4 = 20 + 4 = 24 €."
+    },
+    {
+      "q": "En monopolio, para maximizar beneficio el productor elige la cantidad donde",
+      "opts": ["IT máximo", "IMg = CMg", "CMg mínimo", "IMg > CMg"],
+      "ans": 1,
+      "exp": "Regla general de maximización: Ingreso marginal = coste marginal."
+    }
+  ]

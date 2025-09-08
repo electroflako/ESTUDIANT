@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Descargar bancos JSON – Ciencias Sociales (GS)</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#0b1020;color:#e9efff;margin:0}
+  .wrap{max-width:920px;margin:28px auto;padding:0 16px}
+  .card{background:#121a33;border:1px solid #22305c;border-radius:12px;padding:16px;margin:12px 0}
+  h1,h2{margin:.2rem 0 1rem}
+  button{padding:10px 14px;border-radius:10px;border:1px solid #2b6ca0;background:#1a364f;color:#e9efff;cursor:pointer;margin-right:8px}
+  pre{white-space:pre-wrap;background:#0f1732;border:1px solid #22305c;border-radius:8px;padding:10px;color:#9fb0d4;max-height:180px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Descargar bancos de preguntas – Ciencias Sociales (Grado Superior)</h1>
+
+  <div class="card">
+    <h2>1) Matemáticas aplicadas a las CCSS</h2>
+    <button data-id="matematicas">Descargar matematicas_sociales.json</button>
+    <pre id="prev-matematicas"></pre>
+  </div>
+
+  <div class="card">
+    <h2>2) Economía</h2>
+    <button data-id="economia">Descargar economia.json</button>
+    <pre id="prev-economia"></pre>
+  </div>
+
+  <div class="card">
+    <h2>3) Geografía</h2>
+    <button data-id="geografia">Descargar geografia.json</button>
+    <pre id="prev-geografia"></pre>
+  </div>
+
+  <div class="card">
+    <h2>4) Historia contemporánea</h2>
+    <button data-id="historia">Descargar historia_contemporanea.json</button>
+    <pre id="prev-historia"></pre>
+  </div>
+
+  <div class="card">
+    <h2>5) Lengua castellana</h2>
+    <button data-id="lengua">Descargar lengua_castellana.json</button>
+    <pre id="prev-lengua"></pre>
+  </div>
+</div>
+
+<script>
+// Pega aquí los 5 JSON (exactamente como arriba)
+const bancos = {
+  matematicas: /* pega aquí el contenido de matematicas_sociales.json */ [],
+  economia:    /* pega aquí el contenido de economia.json */ [],
+  geografia:   /* pega aquí el contenido de geografia.json */ [],
+  historia:    /* pega aquí el contenido de historia_contemporanea.json */ [],
+  lengua:      /* pega aquí el contenido de lengua_castellana.json */ []
+};
+
+function descargar(nombre, contenido){
+  const blob = new Blob([JSON.stringify(contenido, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nombre;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 0);
+}
+
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-id]');
+  if(!btn) return;
+  const id = btn.getAttribute('data-id');
+  const data = bancos[id];
+  if(!Array.isArray(data) || data.length===0){
+    alert('Pega el JSON correspondiente en el archivo (variable bancos).');
+    return;
+  }
+  const nombre = {
+    matematicas: 'matematicas_sociales.json',
+    economia: 'economia.json',
+    geografia: 'geografia.json',
+    historia: 'historia_contemporanea.json',
+    lengua: 'lengua_castellana.json'
+  }[id];
+  descargar(nombre, data);
+});
+
+// Vista previa (primeros 3 ítems) para verificar que pegaste bien
+function vista(id, preId){
+  const arr = bancos[id];
+  document.getElementById(preId).textContent = Array.isArray(arr) && arr.length
+    ? JSON.stringify(arr.slice(0,3), null, 2)
+    : 'Pega aquí el JSON de este banco en la variable bancos.';
+}
+vista('matematicas','prev-matematicas');
+vista('economia','prev-economia');
+vista('geografia','prev-geografia');
+vista('historia','prev-historia');
+vista('lengua','prev-lengua');
+</script>
+</body>
+</html>

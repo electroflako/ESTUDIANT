@@ -1,0 +1,123 @@
+[
+    {
+      "q": "Función del lenguaje predominante en un anuncio publicitario",
+      "opts": ["Referencial", "Apelativa (conativa)", "Poética", "Metalingüística"],
+      "ans": 1,
+      "exp": "Busca influir en el receptor (persuadir)."
+    },
+    {
+      "q": "La tilde diacrítica en ‘tú’ indica",
+      "opts": ["Determinante posesivo", "Pronombre personal", "Adverbio", "Preposición"],
+      "ans": 1,
+      "exp": "‘tú’ (pronombre) / ‘tu’ (posesivo)."
+    },
+    {
+      "q": "Señala la palabra bien acentuada",
+      "opts": ["camion", "cafe", "canción", "arbol"],
+      "ans": 2,
+      "exp": "‘canción’ es aguda terminada en ‘n’."
+    },
+    {
+      "q": "Figura retórica en: ‘Tus ojos, dos luceros’",
+      "opts": ["Símil", "Metáfora", "Hipérbole", "Anáfora"],
+      "ans": 1,
+      "exp": "Identificación sin nexo comparativo (como/parece)."
+    },
+    {
+      "q": "El narrador omnisciente",
+      "opts": ["Es un personaje secundario", "Desconoce los pensamientos", "Conoce pensamientos y hechos de todos", "Narra en 2.ª persona"],
+      "ans": 2,
+      "exp": "Sabe todo del universo narrativo."
+    },
+    {
+      "q": "‘Lo haré cuando vengas’: la subordinada es",
+      "opts": ["Sustantiva", "Adjetiva", "Adverbial temporal", "Adverbial causal"],
+      "ans": 2,
+      "exp": "Indica tiempo (cuándo)."
+    },
+    {
+      "q": "‘Se lo di’: ‘lo’ funciona como",
+      "opts": ["CI", "CD", "Atributo", "Vocativo"],
+      "ans": 1,
+      "exp": "‘lo’ = CD; ‘le’ sería CI en leísmo estándar restringido."
+    },
+    {
+      "q": "En ‘El rápido tren llegó a tiempo’, ‘rápido’ es",
+      "opts": ["Sustantivo", "Adjetivo especificativo", "Adjetivo explicativo", "Adverbio"],
+      "ans": 2,
+      "exp": "Explicativo (epíteto): no restringe, añade cualidad."
+    },
+    {
+      "q": "Marcador textual típico de causa",
+      "opts": ["Por tanto", "Además", "Porque", "Sin embargo"],
+      "ans": 2,
+      "exp": "‘Porque’ introduce causa; ‘por tanto’ es consecuencia."
+    },
+    {
+      "q": "Señala el enunciado correcto",
+      "opts": ["Haiga mucha gente", "Habían varios problemas", "Hubo varios problemas", "Habrían llegado ayer"],
+      "ans": 2,
+      "exp": "Concordancia: ‘Hubo’ con plural es correcto en impersonal."
+    },
+    {
+      "q": "Un texto expositivo se caracteriza por",
+      "opts": ["Subjetividad y emotividad", "Objetividad y claridad", "Rima y figuras", "Apelaciones constantes al receptor"],
+      "ans": 1,
+      "exp": "Explica/informa de manera objetiva."
+    },
+    {
+      "q": "‘Solo’ y los demostrativos (este, ese, aquel)…",
+      "opts": ["Siempre llevan tilde", "Nunca llevan tilde", "No llevan tilde salvo ambigüedad relevante", "Se tildan en interrogativas siempre"],
+      "ans": 2,
+      "exp": "RAE: se desaconseja tilde salvo ambigüedad no resoluble."
+    },
+    {
+      "q": "En ‘Me alegra que vengas’, la proposición ‘que vengas’ es",
+      "opts": ["Sustantiva de sujeto", "Adjetiva", "Adverbial", "Coordinada"],
+      "ans": 0,
+      "exp": "Funciona como sujeto de ‘me alegra’."
+    },
+    {
+      "q": "‘Anduve’ es forma verbal de",
+      "opts": ["Pretérito perfecto simple de indicativo", "Pretérito imperfecto", "Pretérito pluscuamperfecto", "Condicional simple"],
+      "ans": 0,
+      "exp": "Raíz irregular (anduv-)."
+    },
+    {
+      "q": "‘Hubieras venido’ es",
+      "opts": ["Pretérito pluscuamperfecto de subjuntivo", "Pretérito perfecto de subjuntivo", "Condicional compuesto", "Pretérito anterior"],
+      "ans": 0,
+      "exp": "‘Haber’ en subjuntivo + participio."
+    },
+    {
+      "q": "Valor de ‘se’ en ‘Se vende piso’",
+      "opts": ["Reflexivo", "Dativo ético", "Pasiva refleja", "Impersonal pronominal con CD explícito"],
+      "ans": 2,
+      "exp": "Pasiva refleja: ‘Se vende (un) piso’."
+    },
+    {
+      "q": "‘A grandes males, grandes remedios’ es",
+      "opts": ["Proposición", "Exclamación", "Refrán", "Aforismo científico"],
+      "ans": 2,
+      "exp": "Expresión proverbial popular."
+    },
+    {
+      "q": "‘Más mejor’ es incorrecto por",
+      "opts": ["Dequeísmo", "Queísmo", "Plebeyismo", "Redundancia (comparativo irregular)"],
+      "ans": 3,
+      "exp": "‘Mejor’ ya es comparativo; no admite ‘más’."
+    },
+    {
+      "q": "‘Que’ en ‘El libro que compré’ es",
+      "opts": ["Conjunción", "Pronombre relativo", "Determinante", "Interjección"],
+      "ans": 1,
+      "exp": "Introduce una subordinada adjetiva."
+    },
+    {
+      "q": "Sinónimo aproximado de ‘parco’",
+      "opts": ["Abundante", "Escueto", "Difuso", "Enrevesado"],
+      "ans": 1,
+      "exp": "‘Parco’ = sobrio, escueto."
+    }
+  ]
+  

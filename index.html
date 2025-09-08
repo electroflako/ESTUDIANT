@@ -1,0 +1,758 @@
+<!doctype html>
+<!-- =========================================================
+     HTML5 – Mini examen (archivo único)
+     BEM + buenas prácticas + comentarios guía
+     Pensado para uso 100% local (Brave/Chrome)
+     ========================================================= -->
+<html lang="es">
+<head>
+  <!-- ===================== Metadatos / Head ===================== -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ESTUDIANT</title>
+
+  <!-- ===================== CSS (BEM) ===================== -->
+  <style>
+    /* ======= Paleta / Tema ======= */
+    :root{
+      --bg:#0b1020; --bg-2:#0e1530; --card:#121a33;
+      --text:#e9efff; --muted:#9fb0d4; --border:#22305c;
+      --accent:#5dd0ff; --ok:#35d49a; --bad:#ff6b6b; --warn:#ffd166;
+    }
+
+    /* ======= Reset mínimo ======= */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      color:var(--text); background:linear-gradient(180deg,var(--bg),var(--bg-2) 45%,var(--bg));
+    }
+
+    /* =========================================================
+       Bloque: quiz (contenedor principal)
+       ========================================================= */
+    .quiz{max-width:1040px; margin:28px auto; padding:0 16px}
+    .quiz__header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px}
+    .quiz__title{margin:0 0 6px; font-size:1.5rem}
+    .quiz__subtitle{margin:0; color:var(--muted)}
+    .quiz__toolbar{display:flex; flex-wrap:wrap; gap:10px}
+    .quiz__stats{color:var(--muted); font-size:.95rem; display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:6px}
+    .quiz__list{margin-top:12px}
+    .quiz__footer{margin:22px 0 38px; color:var(--muted); font-size:.9rem}
+
+    /* ======= Botones ======= */
+    .btn{appearance:none; border:none; border-radius:10px; padding:10px 14px;
+         background:#1a2548; color:var(--text); cursor:pointer;
+         transition:transform .05s ease, background .2s ease; border:1px solid var(--border)}
+    .btn:hover{background:#1e2b56}
+    .btn:active{transform:scale(.98)}
+    .btn[disabled]{opacity:.55; cursor:not-allowed}
+    .btn--accent{background:#1a364f; border-color:#2b6ca0}
+    .btn--ok{background:#163b2f; border-color:#1f7a5f}
+    .btn--warn{background:#3d2f13; border-color:#906d26}
+    .btn--danger{background:#4a1f1f; border-color:#8a3030}
+
+    /* ======= Píldoras ======= */
+    .pill{padding:.1rem .5rem; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:.78rem}
+
+    /* =========================================================
+       Bloque: panel (reutilizable para import/exam)
+       ========================================================= */
+    .panel{margin:10px 0 12px}
+    .panel__summary{cursor:pointer; color:var(--accent)}
+    .panel__body{border:1px solid var(--border); background:#0f1732; padding:12px; border-radius:12px; margin-top:8px; display:grid; gap:10px}
+    .panel__row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .panel__input{padding:8px; border-radius:8px; border:1px solid var(--border); background:#0b132a; color:var(--text)}
+    .panel__input--wide{flex:1 1 420px; min-width:240px}
+    .panel__textarea{width:100%; min-height:120px; padding:10px; border-radius:8px; border:1px solid var(--border); background:#0b132a; color:var(--text); resize:vertical; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+    .panel__hint{color:var(--muted); font-size:.9rem}
+
+    /* =========================================================
+       Bloque: question (tarjeta de pregunta)
+       ========================================================= */
+    .question{background:rgba(18,26,51,.86); border:1px solid var(--border); border-radius:14px; padding:16px 16px 10px; margin:14px 0}
+    .question--good{border-left:6px solid var(--ok)}
+    .question--bad {border-left:6px solid var(--bad)}
+    .question__header{display:flex; gap:8px; margin-bottom:6px}
+    .question__tag{font-size:.8rem; color:#9fb0d4; background:#162149; border:1px solid var(--border); padding:2px 8px; border-radius:999px}
+    .question__title{margin:0; font-size:1.02rem}
+    .question__options{display:grid; gap:10px; margin:10px 0 6px}
+    .question__option{display:flex; gap:10px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0f1732}
+    .question__option input{margin-top:2px; transform:scale(1.15)}
+    .question__option--correct{outline:2px solid rgba(53,212,154,.7); background:#0f1f1a}
+    .question__option--wrong  {outline:2px solid rgba(255,107,107,.65); background:#281515}
+    .question__actions{display:flex; gap:8px; margin-top:8px}
+    .question__hint{font-size:.9rem; color:var(--muted); margin-left:auto}
+    .question__feedback{margin-top:8px; font-weight:600}
+    .question__feedback--ok{color:var(--ok)}
+    .question__feedback--bad{color:var(--bad)}
+    .question__feedback--muted{color:var(--muted)}
+    .question__exp{margin-top:8px; padding:10px 12px; border:1px dashed var(--border); border-radius:10px; color:var(--muted); background:#0e1630; display:none}
+
+    /* ======= Modo examen (modificadores sobre contenedor raíz) ======= */
+    .quiz--exam .question__actions{display:none}                        /* oculta Comprobar/Limpiar */
+    .quiz--exam .question__exp{display:none !important}                 /* oculta explicación */
+    .quiz--exam #timer-pill{display:inline-block}
+    #timer-pill{display:none}
+    .quiz--exam #score-pill{visibility:hidden}
+    .quiz--exam.quiz--finished #score-pill{visibility:visible}
+    .quiz--exam.quiz--finished .question input[type="radio"]{pointer-events:none}
+  </style>
+</head>
+<body>
+  <!-- ===================== HTML (estructura BEM) ===================== -->
+  <div class="quiz" id="quizApp">
+    <!-- Encabezado -->
+    <header class="quiz__header">
+      <div>
+        <h1 class="quiz__title">ESTUDIANT</h1>
+        <p class="quiz__subtitle">Modo práctica y modo examen. Uso 100% local. Persistencia, importación y CSV.</p>
+      </div>
+      <div class="quiz__toolbar">
+        <!-- Botones principales (modo práctica) -->
+        <button id="btnShuffle"   class="btn btn--accent" title="Mezclar preguntas y opciones">Mezclar</button>
+        <button id="btnCheckAll"  class="btn btn--ok"     title="Corregir todo">Corregir todo</button>
+        <button id="btnReset"     class="btn btn--warn"   title="Limpiar respuestas">Reiniciar</button>
+        <button id="btnExport"    class="btn btn--ok"     title="Exportar resultados a CSV">Exportar CSV</button>
+        <button id="btnClearData" class="btn btn--danger" title="Borrar datos guardados">Borrar datos</button>
+      </div>
+    </header>
+
+    <!-- Panel de importación de preguntas -->
+    <details class="panel" id="panelImport">
+      <summary class="panel__summary">Cargar preguntas (JSON) – Archivo o pegar texto</summary>
+      <div class="panel__body">
+        <div class="panel__row">
+          <input id="fileInput" type="file" accept="application/json" class="panel__input" />
+          <button id="btnLoadFile" class="btn btn--accent">Cargar archivo JSON</button>
+          <span class="panel__hint">Recomendado en uso local (sin CORS).</span>
+        </div>
+        <textarea id="jsonText" class="panel__textarea" placeholder='[
+  {"q":"Pregunta 1","opts":["A","B","C","D"],"ans":0,"exp":"Explicación..."},
+  {"q":"Pregunta 2","opts":["A","B","C","D"],"ans":2,"exp":"Explicación..."}
+]'></textarea>
+        <div class="panel__row">
+          <button id="btnLoadText" class="btn btn--ok">Cargar JSON pegado</button>
+          <span class="panel__hint">Formato: arreglo de objetos con campos q (string), opts (array de 4 strings), ans (0–3), exp (string).</span>
+        </div>
+      </div>
+    </details>
+
+    <!-- Panel de modo examen -->
+    <details class="panel" id="panelExam">
+      <summary class="panel__summary">Modo examen (local)</summary>
+      <div class="panel__body">
+        <div class="panel__row">
+          <label>Duración (min):
+            <input id="examMinutes" type="number" min="1" max="300" value="20" class="panel__input">
+          </label>
+          <label><input id="examShuffle" type="checkbox" checked> Mezclar al iniciar</label>
+          <span class="panel__hint">Durante el examen no verás soluciones. Al finalizar, se corrige y se bloquean respuestas.</span>
+        </div>
+        <div class="panel__row">
+          <button id="btnExamStart"  class="btn btn--ok">Iniciar examen</button>
+          <button id="btnExamFinish" class="btn btn--warn">Finalizar examen</button>
+          <button id="btnExamReset"  class="btn btn--danger">Reiniciar modo examen</button>
+        </div>
+      </div>
+    </details>
+
+    <!-- Estado -->
+    <div class="quiz__stats">
+      <span id="score-pill"  class="pill">Aciertos: 0 / 0</span>
+      <span id="timer-pill"  class="pill">00:00</span>
+      <span id="dataset-pill" class="pill">Dataset: por defecto</span>
+      <span class="pill">Archivo único (HTML+CSS+JS)</span>
+    </div>
+
+    <!-- Contenedor de preguntas -->
+    <div id="quizList" class="quiz__list"></div>
+
+    <!-- Pie -->
+    <footer class="quiz__footer">
+      Consejo: usa “Cargar archivo JSON” para tus bancos de preguntas locales. Brave/Chrome guardarán tu estado en localStorage.
+    </footer>
+  </div>
+
+  <!-- ===================== JavaScript (lógica) ===================== -->
+  <script>
+  // ================================================================
+  // JS – App de examen local (IIFE para aislar el alcance)
+  // ================================================================
+  (function(){
+    'use strict';
+
+    /* -------------------- Utilidades DOM -------------------- */
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    /* -------------------- Claves de storage -------------------- */
+    const STORAGE_STATE = 'quiz_state_v3';
+    const STORAGE_DATA  = 'quiz_data_v3';
+
+    /* -------------------- Referencias DOM -------------------- */
+    const $app      = $('#quizApp');
+    const $list     = $('#quizList');
+    const $score    = $('#score-pill');
+    const $timer    = $('#timer-pill');
+    const $dataset  = $('#dataset-pill');
+
+    /* -------------------- Auxiliares -------------------- */
+    const letters = ['A','B','C','D'];
+    const now = () => Date.now();
+    const pad2 = n => String(n).padStart(2,'0');
+    const fmtTime = ms => {
+      const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
+      return `${pad2(Math.max(0,m))}:${pad2(Math.max(0,s))}`;
+    };
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+    function fp(obj){ try{ const s=JSON.stringify(obj); let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return 'fp_'+h.toString(16);}catch{ return 'fp_0'; } }
+    function download(name, text){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+      a.download = name; document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    }
+
+    /* -------------------- Dataset por defecto -------------------- */
+    const DEFAULT_EXAM = [
+      {q:"En lógica proposicional, si P ⇒ Q y P es falsa y Q es verdadera, entonces P ⇒ Q es:",
+       opts:["Verdadera","Falsa","Indeterminada","Depende del contexto"], ans:0,
+       exp:"La implicación solo es falsa cuando P es verdadera y Q es falsa. Con P falsa, P⇒Q es verdadera."
+      },
+      {q:"A partir de P ⇒ Q y ¬Q, ¿qué conclusión válida se obtiene?",
+       opts:["P","¬P","Q","P ∧ Q"], ans:1,
+       exp:"Modus tollens: de P⇒Q y ¬Q se deduce ¬P."
+      },
+      {q:"La contrarrecíproca de “Si X entonces Y” es:",
+       opts:["Si Y entonces X","Si no X entonces no Y","Si no Y entonces no X","Si no X entonces Y"], ans:2,
+       exp:"Contraposición: ¬Y ⇒ ¬X, lógicamente equivalente al original."
+      },
+      {q:"En un universo de 100 personas, |A|=20, |B|=15 y |A ∩ B|=7. ¿Cuánto vale |A ∪ B|?",
+       opts:["22","28","34","12"], ans:1,
+       exp:"Inclusión–exclusión: 20 + 15 − 7 = 28."
+      },
+      {q:"¿Cuál de las siguientes identidades es correcta (De Morgan)?",
+       opts:["(A ∪ B)^c = A^c ∩ B^c","(A ∩ B)^c = A^c ∩ B^c","A^c ∪ B^c = A ∩ B","(A^c)^c = A ∪ B"], ans:0,
+       exp:"De Morgan: (A ∪ B)^c = A^c ∩ B^c y (A ∩ B)^c = A^c ∪ B^c."
+      },
+      {q:"U={1,…,20}. A={múltiplos de 4} y B={n ≡ 1 (mod 3)}. ¿Cuál es |A ∩ B|?",
+       opts:["1","2","3","4"], ans:1,
+       exp:"A={4,8,12,16,20}. De ellos cumplen n≡1 (mod 3): 4 y 16. Total 2."
+      },
+      {q:"¿Cuál es irracional?",
+       opts:["0,12̅","√18 / 3","22/7","−5"], ans:1,
+       exp:"√18/3 = (3√2)/3 = √2, que es irracional. Las otras son racionales."
+      },
+      {q:"¿Qué conjunto es cerrado para la resta?",
+       opts:["ℕ","ℤ","ℚ+ (racionales positivos)","ℝ\\ℚ"], ans:1,
+       exp:"ℕ no lo es (3−5=−2). ℤ sí: a−b ∈ ℤ para todos los enteros."
+      },
+      {q:"¿Qué fracción es equivalente a 3/8?",
+       opts:["9/24","6/10","12/40","15/48"], ans:0,
+       exp:"Multiplica por el mismo número: 3·3 / 8·3 = 9/24."
+      },
+      {q:"Señala el enunciado verdadero:",
+       opts:["Entre dos racionales distintos siempre hay otro racional y también un irracional",
+             "Entre dos irracionales distintos no hay racionales",
+             "Entre dos reales distintos hay solo finitos racionales",
+             "Entre dos enteros consecutivos no hay racionales"], ans:0,
+       exp:"ℚ e irracionales son densos en ℝ: entre dos reales distintos hay infinitos de ambos."
+      },
+      {q:"Sean A=(−2,4] y B=[1,6). A ∩ B es:",
+       opts:["(−2,6)","[1,4]","(−2,1)","[4,6)"], ans:1,
+       exp:"Intersección: de 1 (cerrado) a 4 (cerrado) ⇒ [1,4]."
+      },
+      {q:"“Si Ana estudia o hace ejercicio, entonces aprueba”. ¿Qué caso NO permite concluir que aprueba?",
+       opts:["Estudia","Hace ejercicio","Estudia y hace ejercicio","No estudia ni hace ejercicio"], ans:3,
+       exp:"Si el antecedente (estudia ∨ ejercicio) es falso, no podemos concluir que aprueba."
+      },
+      {q:"Halla q y r tales que −23 = 5q + r con 0 ≤ r < 5.",
+       opts:["q=−4, r=−3","No existe tal r","q=−5, r=2","q=−6, r=7"], ans:2,
+       exp:"5(−5)=−25; con r=2 ⇒ −25+2=−23 y 0≤2<5."
+      },
+      {q:"A={x∈ℤ : 6|x}; B={x∈ℤ : x múltiplo de 2 y de 3}. Entonces:",
+       opts:["A ⊂ B","B ⊂ A","A = B","A ∩ B = ∅"], ans:2,
+       exp:"Ser múltiplo de 2 y de 3 equivale a ser múltiplo de mcm(2,3)=6 ⇒ A=B."
+      },
+      {q:"¿Qué equivalencia es siempre verdadera?",
+       opts:["P⇒Q ≡ ¬P⇒¬Q","P⇒Q ≡ ¬Q⇒¬P","P⇒Q ≡ Q⇒P","P⇒Q ≡ P∧¬Q"], ans:1,
+       exp:"Contraposición: P⇒Q es lógicamente equivalente a ¬Q⇒¬P."
+      },
+      {q:"U={1,…,100}; A={múltiplos de 5}; B={múltiplos de 10}. ¿Cuánto vale |A^c ∪ B^c|?",
+       opts:["10","20","90","95"], ans:2,
+       exp:"A^c ∪ B^c = (A ∩ B)^c = B^c (porque B⊂A). Hay 10 múltiplos de 10 ⇒ 100−10=90."
+      },
+      {q:"Ordena de menor a mayor: −2/3, −0,6, −5/8.",
+       opts:["−0,6 < −5/8 < −2/3","−2/3 < −5/8 < −0,6","−5/8 < −2/3 < −0,6","−5/8 < −0,6 < −2/3"], ans:1,
+       exp:"Valores: −0,666…, −0,625, −0,6 ⇒ menor: −2/3; luego −5/8; luego −0,6."
+      },
+      {q:"A={x≥2}, B={x≤−1}. Entonces:",
+       opts:["A ∪ B = ℝ y A ∩ B = (−1,2)","A ∪ B = (−∞,−1] ∪ [2,∞) y A ∩ B = ∅",
+             "A ∪ B = [−1,2] y A ∩ B = (−∞,−1] ∪ [2,∞)","A ∪ B = ∅ y A ∩ B = (−∞,−1] ∪ [2,∞)"], ans:1,
+       exp:"Son regiones separadas; no solapan (∩=∅) y la unión son dos rayos."
+      },
+      {q:"Señala la verdadera:",
+       opts:["Todo entero es racional","Todo racional es entero","Todo irracional es racional","Todo real es racional"], ans:0,
+       exp:"n = n/1 ⇒ cualquier entero es un racional."
+      },
+      {q:"Calcula: (2/3 − 5/4) + 1/6",
+       opts:["−5/12","1/12","−1/12","−7/12"], ans:0,
+       exp:"Común 12: 8/12 − 15/12 + 2/12 = −5/12."
+      }
+    ];
+
+    /* -------------------- Estado -------------------- */
+    let EXAM = [];                   // Dataset activo
+    let EXAM_FP = 'fp_0';            // Huella del dataset
+    let order = [];                  // Índice real por posición visible
+    let answers = [];                // Respuestas elegidas (índice original de opción) por posición
+    let result  = [];                // true/false/null por posición
+
+    // Modo examen
+    let exam = { mode:false, running:false, finished:false, durationMs:0, endAt:0, timer:null };
+
+    /* -------------------- Renderizado -------------------- */
+    function render({shuffleOptions=false, resetOrder=true}={}){
+      if(resetOrder) order = EXAM.map((_,i)=>i);
+      $list.innerHTML = '';
+
+      order.forEach((origIdx, viewIdx)=>{
+        const it = EXAM[origIdx];
+        const opts = it.opts.map((t,i)=>({t,i}));
+        if(shuffleOptions) shuffle(opts);
+
+        const card = document.createElement('div');
+        card.className = 'question';
+        card.dataset.viewIndex = String(viewIdx);
+        card.dataset.origIndex = String(origIdx);
+
+        card.innerHTML = `
+          <div class="question__header">
+            <span class="question__tag">Pregunta ${viewIdx+1}</span>
+            <span class="question__tag">Opciones: 4</span>
+          </div>
+          <p class="question__title">${it.q}</p>
+          <div class="question__options">
+            ${opts.map((op,k)=>`
+              <label class="question__option">
+                <input type="radio" name="q${viewIdx}" value="${op.i}">
+                <div><strong>${letters[k]}.</strong> ${op.t}</div>
+              </label>
+            `).join('')}
+          </div>
+          <div class="question__actions">
+            <button class="btn btn--ok" data-action="check">Comprobar</button>
+            <button class="btn btn--warn" data-action="clear">Limpiar</button>
+            <span class="question__hint">Responde y comprueba para ver la explicación.</span>
+          </div>
+          <div class="question__feedback question__feedback--muted" aria-live="polite">Sin responder.</div>
+          <div class="question__exp"><strong>Explicación:</strong> ${it.exp}</div>
+        `;
+        $list.appendChild(card);
+      });
+
+      answers = Array(EXAM.length).fill(null);
+      result  = Array(EXAM.length).fill(null);
+      updateStats();
+    }
+
+    /* -------------------- Corrección por tarjeta -------------------- */
+    function checkCard(card, reveal=false){
+      const viewIdx = Number(card.dataset.viewIndex);
+      const origIdx = Number(card.dataset.origIndex);
+      const it = EXAM[origIdx];
+
+      const selected = card.querySelector('input[type="radio"]:checked');
+      const fb  = card.querySelector('.question__feedback');
+      const exp = card.querySelector('.question__exp');
+      const boxes = [...card.querySelectorAll('.question__option')];
+
+      if(!selected){
+        fb.className = 'question__feedback question__feedback--bad';
+        fb.textContent = 'Elige una opción antes de comprobar.';
+        if(reveal) exp.style.display='block'; else exp.style.display='none';
+        return;
+      }
+
+      const chosen = Number(selected.value);
+      const ok = (chosen === it.ans);
+      answers[viewIdx] = chosen;
+
+      // En práctica fijamos resultado ya; en examen solo si reveal=true (finalizado)
+      if(!exam.mode || reveal) result[viewIdx] = ok;
+
+      boxes.forEach(b=>b.classList.remove('question__option--correct','question__option--wrong'));
+      card.classList.remove('question--good','question--bad');
+
+      // Marcar correcta y, si aplica, la incorrecta
+      boxes.forEach(b=>{
+        const v = Number(b.querySelector('input').value);
+        if(v===it.ans && (!exam.mode || reveal)) b.classList.add('question__option--correct');
+      });
+      if(!ok && (!exam.mode || reveal)){
+        selected.closest('.question__option').classList.add('question__option--wrong');
+      }
+
+      if(!exam.mode || reveal){
+        fb.className = ok
+          ? 'question__feedback question__feedback--ok'
+          : 'question__feedback question__feedback--bad';
+        fb.textContent = ok ? '¡Correcto!' : `Incorrecto. Respuesta correcta: "${it.opts[it.ans]}".`;
+        card.classList.add(ok ? 'question--good' : 'question--bad');
+        exp.style.display = 'block';
+      }else{
+        fb.className = 'question__feedback question__feedback--muted';
+        fb.textContent = 'Respuesta registrada.';
+        exp.style.display = 'none';
+      }
+
+      saveState();
+      updateStats();
+    }
+
+    function clearCard(card){
+      const viewIdx = Number(card.dataset.viewIndex);
+      [...card.querySelectorAll('input[type="radio"]')].forEach(i=> i.checked=false);
+      card.querySelectorAll('.question__option').forEach(b=> b.classList.remove('question__option--correct','question__option--wrong'));
+      card.classList.remove('question--good','question--bad');
+
+      const fb = card.querySelector('.question__feedback');
+      fb.className = 'question__feedback question__feedback--muted';
+      fb.textContent = 'Sin responder.';
+      card.querySelector('.question__exp').style.display = 'none';
+
+      answers[viewIdx] = null;
+      if(!exam.mode) result[viewIdx] = null;
+
+      saveState();
+      updateStats();
+    }
+
+    /* -------------------- Acciones globales -------------------- */
+    function updateStats(){
+      const ok = result.filter(v=>v===true).length;
+      $score.textContent = `Aciertos: ${ok} / ${EXAM.length}`;
+      $dataset.textContent = `Dataset: ${EXAM_FP===fp(DEFAULT_EXAM)?'por defecto':'personalizado'}`;
+    }
+
+    function checkAll(){ $$('.question').forEach(c=>checkCard(c, exam.mode)); saveState(); }
+    function resetAll(){ $$('.question').forEach(clearCard); saveState(); }
+    function shuffleAll(){
+      order = shuffle(order);
+      render({shuffleOptions:true, resetOrder:false});
+      saveState();
+    }
+
+    /* -------------------- Modo examen -------------------- */
+    function togglePracticeButtons(disabled){
+      $('#btnShuffle').disabled   = disabled;
+      $('#btnCheckAll').disabled  = disabled;
+      $('#btnReset').disabled     = disabled;
+      // bloquear importación mientras corre
+      $('#btnLoadFile').disabled  = disabled;
+      $('#btnLoadText').disabled  = disabled;
+      $('#fileInput').disabled    = disabled;
+      $('#jsonText').disabled     = disabled;
+    }
+
+    function startExam(){
+      if(exam.running) return;
+      exam.mode = true; exam.running = true; exam.finished = false;
+
+      const mins = Math.max(1, Math.min(300, parseInt($('#examMinutes').value||'20',10)));
+      const doShuffle = $('#examShuffle').checked;
+
+      render({shuffleOptions:doShuffle, resetOrder:true});
+      $app.classList.add('quiz--exam'); $app.classList.remove('quiz--finished');
+
+      exam.durationMs = mins*60*1000;
+      exam.endAt = now() + exam.durationMs;
+      startTimer();
+
+      togglePracticeButtons(true);
+      saveState();
+    }
+
+    function finishExam(){
+      if(!exam.mode) return;
+      exam.running=false; exam.finished=true;
+      stopTimer();
+
+      // Revelar y calificar todo
+      $$('.question').forEach(c=>checkCard(c,true));
+      $$('.question input[type="radio"]').forEach(i=> i.disabled=true);
+
+      $app.classList.add('quiz--finished');
+      togglePracticeButtons(false);
+      saveState();
+      updateStats();
+    }
+
+    function resetExam(){
+      stopTimer();
+      exam = {mode:false, running:false, finished:false, durationMs:0, endAt:0, timer:null};
+      $app.classList.remove('quiz--exam','quiz--finished');
+      render({shuffleOptions:false, resetOrder:true});
+      togglePracticeButtons(false);
+      saveState();
+    }
+
+    function startTimer(){
+      updateTimerUI();
+      exam.timer = setInterval(()=>{
+        if(!exam.running){ stopTimer(); return; }
+        const left = exam.endAt - now();
+        if(left<=0){ finishExam(); }
+        else updateTimerUI();
+      }, 500);
+    }
+    function stopTimer(){ if(exam.timer){ clearInterval(exam.timer); exam.timer=null; } updateTimerUI(); }
+    function updateTimerUI(){
+      const left = Math.max(0, exam.endAt - now());
+      $timer.textContent = fmtTime(left);
+    }
+
+    /* -------------------- Persistencia -------------------- */
+    function saveData(){
+      try{ localStorage.setItem(STORAGE_DATA, JSON.stringify({fp:EXAM_FP, exam:EXAM})); }catch{}
+    }
+    function loadDataSaved(){
+      try{
+        const raw = localStorage.getItem(STORAGE_DATA);
+        if(!raw) return null;
+        const obj = JSON.parse(raw);
+        if(!Array.isArray(obj.exam)) return null;
+        return obj;
+      }catch{ return null; }
+    }
+
+    function saveState(){
+      try{
+        const payload = {
+          fp: EXAM_FP, order, answers, result,
+          exam: { mode:exam.mode, running:exam.running, finished:exam.finished, durationMs:exam.durationMs, endAt:exam.endAt }
+        };
+        localStorage.setItem(STORAGE_STATE, JSON.stringify(payload));
+      }catch{}
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(STORAGE_STATE);
+        if(!raw) return false;
+        const obj = JSON.parse(raw);
+        if(!obj || obj.fp !== EXAM_FP) return false;
+
+        order   = Array.isArray(obj.order)&&obj.order.length===EXAM.length ? obj.order.slice() : EXAM.map((_,i)=>i);
+        answers = Array.isArray(obj.answers)? obj.answers.slice(): Array(EXAM.length).fill(null);
+        result  = Array.isArray(obj.result)?  obj.result.slice() : Array(EXAM.length).fill(null);
+
+        // Render respetando orden (sin barajar opciones)
+        $list.innerHTML = '';
+        order.forEach((origIdx, viewIdx)=>{
+          const it = EXAM[origIdx];
+          const card = document.createElement('div');
+          card.className = 'question';
+          card.dataset.viewIndex = String(viewIdx);
+          card.dataset.origIndex = String(origIdx);
+          const opts = it.opts.map((t,i)=>({t,i}));
+          card.innerHTML = `
+            <div class="question__header">
+              <span class="question__tag">Pregunta ${viewIdx+1}</span>
+              <span class="question__tag">Opciones: 4</span>
+            </div>
+            <p class="question__title">${it.q}</p>
+            <div class="question__options">
+              ${opts.map((op,k)=>`
+                <label class="question__option">
+                  <input type="radio" name="q${viewIdx}" value="${op.i}">
+                  <div><strong>${letters[k]}.</strong> ${op.t}</div>
+                </label>
+              `).join('')}
+            </div>
+            <div class="question__actions">
+              <button class="btn btn--ok" data-action="check">Comprobar</button>
+              <button class="btn btn--warn" data-action="clear">Limpiar</button>
+              <span class="question__hint">Responde y comprueba para ver la explicación.</span>
+            </div>
+            <div class="question__feedback question__feedback--muted" aria-live="polite">Sin responder.</div>
+            <div class="question__exp"><strong>Explicación:</strong> ${it.exp}</div>
+          `;
+          $list.appendChild(card);
+        });
+
+        // Restaura selecciones
+        answers.forEach((val, viewIdx)=>{
+          if(val!==null){
+            const input = $(`.question[data-view-index="${viewIdx}"] input[value="${val}"]`);
+            if(input) input.checked = true;
+          }
+        });
+
+        // Restaura modo examen
+        if(obj.exam){
+          exam.mode     = !!obj.exam.mode;
+          exam.running  = !!obj.exam.running;
+          exam.finished = !!obj.exam.finished;
+          exam.durationMs = obj.exam.durationMs || 0;
+          exam.endAt      = obj.exam.endAt || 0;
+
+          if(exam.mode){
+            $app.classList.add('quiz--exam');
+            togglePracticeButtons(exam.running);
+            if(exam.finished){
+              $$('.question').forEach(c=>checkCard(c,true));
+              $$('.question input[type="radio"]').forEach(i=> i.disabled=true);
+              $app.classList.add('quiz--finished');
+            }else if(exam.running){
+              if(exam.endAt<=now()) finishExam(); else startTimer();
+            }
+          }else{
+            // Mostrar feedback si ya había corrección en práctica
+            result.forEach((r,viewIdx)=>{
+              if(r!==null){
+                const card = $(`.question[data-view-index="${viewIdx}"]`);
+                if(card) checkCard(card,true);
+              }
+            });
+          }
+        }
+        updateStats();
+        return true;
+      }catch{ return false; }
+    }
+
+    function clearAll(){
+      try{ localStorage.removeItem(STORAGE_STATE); localStorage.removeItem(STORAGE_DATA); }catch{}
+    }
+
+    /* -------------------- Importación JSON -------------------- */
+    function validateJSON(arr){
+      if(!Array.isArray(arr)) return 'El JSON debe ser un arreglo.';
+      for(let i=0;i<arr.length;i++){
+        const x = arr[i];
+        if(!x || typeof x.q!=='string' || !Array.isArray(x.opts) || x.opts.length!==4 || typeof x.ans!=='number' || typeof x.exp!=='string')
+          return `Ítem ${i+1} inválido. Se requiere {q, opts[4], ans(0–3), exp}.`;
+      }
+      return null;
+    }
+    async function loadFromFile(file){
+      const reader = new FileReader();
+      return new Promise((res,rej)=>{
+        reader.onload = ()=>{ try{ res(JSON.parse(reader.result)); }catch(e){ rej(e); } };
+        reader.onerror = ()=> rej(reader.error||new Error('No se pudo leer el archivo.'));
+        reader.readAsText(file,'utf-8');
+      });
+    }
+    function setDataset(newExam, label='personalizado'){
+      EXAM = newExam; EXAM_FP = fp(EXAM); $dataset.textContent = `Dataset: ${label}`;
+      resetExam(); // sale de examen si estaba activo y re-renderiza
+      saveData(); saveState();
+    }
+
+    /* -------------------- Exportación CSV -------------------- */
+    function exportCSV(){
+      const rows = [];
+      rows.push(['#','Pregunta','Elegida (letra)','Elegida (texto)','Correcta (letra)','Correcta (texto)','¿Correcta?','¿Corregida?'].join(','));
+      $$('.question').forEach((card,viewIdx)=>{
+        const origIdx = Number(card.dataset.origIndex);
+        const it = EXAM[origIdx];
+
+        // Mapa índice original -> letra/ texto según DOM
+        const map = {};
+        [...card.querySelectorAll('.question__option')].forEach((box,k)=>{
+          const oi = Number(box.querySelector('input').value);
+          const txt = box.querySelector('div').innerText.replace(/^[A-D]\.\s*/,'');
+          map[oi] = {letter:letters[k], text:txt};
+        });
+
+        const chosen = answers[viewIdx];
+        const chosenInfo  = chosen===null ? {letter:'',text:''} : (map[chosen] || {letter:'',text:''});
+        const correctInfo = map[it.ans] || {letter:'', text: it.opts[it.ans] || ''};
+        const isChecked   = result[viewIdx];
+        const evaluated   = result[viewIdx] !== null;
+
+        rows.push([
+          viewIdx+1,
+          `"${it.q.replace(/"/g,'""')}"`,
+          chosenInfo.letter,
+          `"${(chosenInfo.text||'').replace(/"/g,'""')}"`,
+          correctInfo.letter,
+          `"${(correctInfo.text||'').replace(/"/g,'""')}"`,
+          isChecked===true?'Sí':(isChecked===false?'No':''),
+          evaluated?'Sí':'No'
+        ].join(','));
+      });
+      const ts = new Date().toISOString().replace(/[:T]/g,'-').split('.')[0];
+      download(`examen_${ts}.csv`, rows.join('\n'));
+    }
+
+    /* -------------------- Eventos -------------------- */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // Carga dataset guardado o por defecto
+      const saved = loadDataSaved();
+      if(saved){ EXAM=saved.exam; EXAM_FP=fp(EXAM); $dataset.textContent='Dataset: restaurado'; }
+      else     { EXAM=DEFAULT_EXAM; EXAM_FP=fp(EXAM); $dataset.textContent='Dataset: por defecto'; }
+
+      // Render inicial y restaurar estado si existe
+      render({shuffleOptions:false, resetOrder:true});
+      loadState();
+
+      // Delegación en lista de preguntas
+      $list.addEventListener('click', e=>{
+        const btn = e.target.closest('button'); if(!btn) return;
+        const card = e.target.closest('.question'); if(!card) return;
+        const act = btn.dataset.action;
+        if(act==='check') checkCard(card);
+        if(act==='clear') clearCard(card);
+      });
+      // Guardar selección al cambiar
+      $list.addEventListener('change', e=>{
+        const input = e.target.closest('input[type="radio"]'); if(!input) return;
+        const card = e.target.closest('.question'); const v = Number(card.dataset.viewIndex);
+        answers[v] = Number(input.value); saveState();
+      });
+
+      // Botones práctica
+      $('#btnShuffle').addEventListener('click', shuffleAll);
+      '#btnCheckAll,#btnReset,#btnExport,#btnClearData'.split(',').forEach(sel=>{
+        // no-op, solo para legibilidad arriba
+      });
+      $('#btnCheckAll').addEventListener('click', checkAll);
+      $('#btnReset').addEventListener('click', resetAll);
+      $('#btnExport').addEventListener('click', exportCSV);
+      $('#btnClearData').addEventListener('click', ()=>{
+        if(confirm('¿Borrar estado y dataset guardados?')){ clearAll(); location.reload(); }
+      });
+
+      // Importar: archivo
+      $('#btnLoadFile').addEventListener('click', async ()=>{
+        const f = $('#fileInput').files?.[0]; if(!f) return alert('Selecciona un archivo JSON.');
+        try{
+          const json = await loadFromFile(f);
+          const err = validateJSON(json); if(err) throw new Error(err);
+          setDataset(json, f.name||'archivo');
+          alert('Dataset cargado.');
+        }catch(e){ alert('Error al cargar: '+e.message); }
+      });
+      // Importar: texto pegado
+      $('#btnLoadText').addEventListener('click', ()=>{
+        const raw = $('#jsonText').value.trim(); if(!raw) return alert('Pega JSON en el cuadro.');
+        try{
+          const json = JSON.parse(raw);
+          const err = validateJSON(json); if(err) throw new Error(err);
+          setDataset(json,'pegado');
+          alert('Dataset cargado.');
+        }catch(e){ alert('JSON inválido: '+e.message); }
+      });
+
+      // Examen
+      $('#btnExamStart').addEventListener('click', startExam);
+      $('#btnExamFinish').addEventListener('click', finishExam);
+      $('#btnExamReset').addEventListener('click', resetExam);
+    });
+  })();
+  </script>
+</body>
+</html>

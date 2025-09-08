@@ -1,0 +1,140 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;\f1\fnil\fcharset0 LucidaGrande;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11905\paperh16837\margl1133\margr1133\margb1133\margt1133
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs22 \cf2 \up0 \nosupersub \ulnone \
+# ESTUDIANT \'96 App offline (HTML \'fanico)\
+\
+Aplicaci\'f3n de examen/repaso para usar sin conexi\'f3n en cualquier navegador moderno (recomendado: Brave/Chrome en Windows o Mac). No usa librer\'edas externas ni servidor: todo va en un \'fanico index.html. Permite cargar bancos de preguntas (.json), hacer el examen en modo repaso o examen, exportar e importar resultados (.csv) y guarda tu progreso en el propio navegador (localStorage).\
+\
+## Requisitos\
+- Navegador: Brave o Google Chrome (actualizados).\
+- Sin instalaci\'f3n. No requiere Internet.\
+- Evitar \'93Previsualizar\'94 en Google Drive. Descarga y abre localmente.\
+\
+## Contenido de la carpeta\
+- index.html 
+\f1 \uc0\u8594 
+\f0  la aplicaci\'f3n (archivo \'fanico).\
+- Bancos opcionales: *.json (p. ej., matematicas_sociales.json, economia.json, etc.).\
+- Este README.md.\
+\
+Sugerencia: comparte la carpeta comprimida en ZIP (Drive/USB). Quien la reciba, solo descomprime y abre index.html con doble clic.\
+\
+## Uso r\'e1pido (5 pasos)\
+1) Abre index.html (doble clic).\
+2) Carga preguntas:\
+   - Bot\'f3n \'93Cargar archivo JSON\'94 (recomendado), o\
+   - Pega el JSON en el cuadro y pulsa \'93Cargar JSON pegado\'94.\
+3) Elige modo:\
+   - Repaso: feedback inmediato con \'93Comprobar\'94.\
+   - Examen: sin feedback hasta \'93Finalizar examen\'94 (con temporizador y bloqueo al terminar).\
+4) Responde. En repaso, usa \'93Comprobar\'94 por tarjeta o \'93Corregir todo\'94. En examen, pulsa \'93Iniciar examen\'94 y luego \'93Finalizar examen\'94.\
+5) Exporta resultados a CSV (opcional) o importa un CSV de respuestas para calificar.\
+\
+## Cargar preguntas (JSON)\
+- Opci\'f3n 1: \'93Cargar archivo JSON\'94. Selecciona tu .json local.\
+- Opci\'f3n 2: pega el contenido JSON y pulsa \'93Cargar JSON pegado\'94.\
+\
+Formato del JSON (estricto)\
+- Es un arreglo de objetos con:\
+  - q: string (enunciado; admite HTML sencillo).\
+  - opts: array de 4 strings (opciones).\
+  - ans: n\'famero 0\'963 (\'edndice de la opci\'f3n correcta).\
+  - exp: string (explicaci\'f3n que se muestra al corregir).\
+\
+Plantilla m\'ednima\
+```json\
+[\
+  \{\
+    "q": "Enunciado de la pregunta",\
+    "opts": ["Opci\'f3n A", "Opci\'f3n B", "Opci\'f3n C", "Opci\'f3n D"],\
+    "ans": 0,\
+    "exp": "Explicaci\'f3n breve de por qu\'e9 la respuesta es correcta."\
+  \}\
+]\
+```\
+\
+Consejos\
+- JSON v\'e1lido: sin comas al final, comillas dobles.\
+- Im\'e1genes: usa rutas relativas (\'93img/fig1.png\'94) ubicando la carpeta img junto a index.html, o data:URL si quieres portabilidad total.\
+- Tras cargar un JSON, queda guardado y se restaura en el pr\'f3ximo uso.\
+\
+## Modos de trabajo\
+\
+### Modo repaso\
+- Feedback inmediato con los botones \'93Comprobar\'94 de cada tarjeta o \'93Corregir todo\'94.\
+- Puedes mezclar preguntas/opciones con \'93Mezclar\'94.\
+\
+### Modo examen\
+- Pulsa \'93Iniciar examen\'94 (opcional: \'93Mezclar al iniciar\'94 y \'93Duraci\'f3n (min)\'94).\
+- No ver\'e1s soluciones ni feedback durante el examen.\
+- \'93Finalizar examen\'94 corrige todo, muestra explicaciones y bloquea los inputs.\
+- Temporizador: al agotarse el tiempo, se corrige y finaliza autom\'e1ticamente.\
+- \'93Reiniciar modo examen\'94 vuelve al estado de repaso (sin mezclar).\
+\
+Nota: \'93Intercambiar etiquetas\'94 cambia solo los textos \'93examen/repaso\'94 de la interfaz (por si prefieres esa nomenclatura). La l\'f3gica de modos se controla con \'93Iniciar/Finalizar/Reiniciar\'94.\
+\
+## Exportar resultados (CSV)\
+- \'93Exportar CSV\'94 genera un archivo con:\
+  - N\'famero de pregunta.\
+  - Pregunta (texto).\
+  - Elegida (letra y texto).\
+  - Correcta (letra y texto).\
+  - \'bfCorrecta? y \'bfCorregida?\
+- \'datil para guardar calificaciones o compartir resultados.\
+\
+## Importar resultados (CSV)\
+Dos formatos admitidos:\
+1) CSV exportado por la app (recomendado). Detecta columnas \'93Elegida (letra)\'94 y \'93Correcta (letra)\'94.\
+2) Lista simple de letras (A\'96D). Una por l\'ednea o separadas por comas/espacios.\
+\
+Proceso:\
+- Pulsa \'93Importar CSV\'94, selecciona el archivo.\
+- La app calcula: respondidas, aciertos y nota (sobre 10), y lista los fallos.\
+\
+Importante con formato simple:\
+- Se califica seg\'fan el orden visible de las preguntas en pantalla (si has mezclado, aseg\'farate de que el CSV simple siga ese orden).\
+\
+## Guardado y borrado de datos\
+- La app guarda en localStorage: banco de preguntas cargado, orden, respuestas, estado del modo, tiempo y etiquetas.\
+- Si el navegador est\'e1 en inc\'f3gnito o borra datos al cerrar, se perder\'e1 el estado.\
+- \'93Borrar datos\'94 limpia todo (banco cargado y estado). \'dasalo si quieres empezar de cero.\
+\
+## Crear tus propios bancos\
+- Empieza desde la plantilla m\'ednima y valida el JSON (puedes pegarlo en el editor de la app para verificar).\
+- Mant\'e9n exactamente 4 opciones por pregunta.\
+- Evita HTML complejo en \'93q\'94 (soporta lo b\'e1sico).\
+- Organiza bancos por tema (ej. geograf\'eda.json, econom\'eda.json).\
+\
+## Compartir con compa\'f1eros\
+- Junta index.html + tus bancos .json en una carpeta.\
+- Compr\'edmela en ZIP y s\'fabela a Google Drive o p\'e1sala por USB.\
+- Quien la descargue debe descomprimir y abrir index.html con doble clic (no usar \'93Previsualizar\'94 en Drive).\
+- Funciona en Brave/Chrome (Windows/Mac) sin Internet.\
+\
+## Soluci\'f3n de problemas\
+- No se guarda el progreso:\
+  - Evita navegaci\'f3n privada; revisa permisos de cookies/datos locales.\
+- Error al cargar JSON:\
+  - Revisa comas, comillas dobles, y que haya 4 opciones. El campo ans debe ser 0\'963.\
+- Importar CSV no muestra nota:\
+  - Comprueba el formato (exportado por la app o lista A\'96D). Si es lista, recuerda que se corrige con el orden visible.\
+- Temporizador parece \'93pararse\'94 al cambiar de pesta\'f1a:\
+  - Es el ahorro de recursos del navegador. Al volver, se actualiza y, si venci\'f3, se finaliza autom\'e1ticamente.\
+- Im\'e1genes no se ven:\
+  - Verifica la ruta relativa (\'93img/\'85\'94) y que la carpeta exista junto a index.html. Alternativa: usa data:URL.\
+\
+## Seguridad y privacidad\
+- No hay peticiones a Internet.\
+- Tus datos permanecen en tu navegador (localStorage).\
+- No se recoge informaci\'f3n ni se env\'eda a ning\'fan servidor.\
+\
+## Contacto y mejoras\
+- \'bfNecesitas bancos tem\'e1ticos (p. ej., \'93Estad\'edstica\'94, \'93Historia Contempor\'e1nea\'94, \'93Lengua\'94)? Crea JSONs con el formato indicado o p\'eddeme que te prepare varios.\
+- \'bfQuieres \'93modo estricto\'94 (no poder cambiar una respuesta durante el examen) o l\'edmite de intentos? Se puede a\'f1adir.\
+}
