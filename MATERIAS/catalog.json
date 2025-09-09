@@ -29,4 +29,5 @@
         "title": "Inglés",
         "file": "MATERIAS/ingles.json"
     }
+    { "id": "tic", "title": "T.I.C. (GS)", "file": "MATERIAS/tic.json" }
 ]
