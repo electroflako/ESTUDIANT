@@ -1,0 +1,92 @@
+[
+  {
+    "q": "¿Qué componente de un ordenador es considerado el 'cerebro' del sistema?",
+    "opts": ["RAM", "Disco Duro (HDD/SSD)", "CPU (Procesador)", "Tarjeta Gráfica (GPU)"],
+    "ans": 2,
+    "exp": "La CPU (Central Processing Unit) es la que ejecuta las instrucciones y realiza los cálculos principales."
+  },
+  {
+    "q": "La memoria RAM es un tipo de almacenamiento...",
+    "opts": ["Permanente y rápido", "Volátil y lento", "Permanente y lento", "Volátil y rápido"],
+    "ans": 3,
+    "exp": "La RAM (Random Access Memory) es volátil (se borra al apagar el equipo) y de acceso muy rápido."
+  },
+  {
+    "q": "Un SSD (Solid State Drive) se diferencia de un HDD (Hard Disk Drive) tradicional en que...",
+    "opts": ["Usa discos magnéticos giratorios", "Es más lento pero más barato", "No tiene partes móviles y es más rápido", "Solo se usa para copias de seguridad"],
+    "ans": 2,
+    "exp": "Los SSD usan memoria flash, sin partes mecánicas, lo que los hace mucho más rápidos y resistentes que los HDD."
+  },
+  {
+    "q": "En redes, ¿qué significa la sigla 'IP'?",
+    "opts": ["Internal Protocol", "Internet Provider", "Internet Protocol", "Information Point"],
+    "ans": 2,
+    "exp": "IP significa 'Internet Protocol' y es el protocolo que asigna una dirección única a cada dispositivo en una red."
+  },
+  {
+    "q": "El software que gestiona los recursos de hardware y software de un ordenador es...",
+    "opts": ["El procesador de textos", "El navegador web", "El sistema operativo", "El antivirus"],
+    "ans": 2,
+    "exp": "El Sistema Operativo (Windows, macOS, Linux) es el software base que administra todo el sistema."
+  },
+  {
+    "q": "En una hoja de cálculo (como Excel o Google Sheets), la fórmula `=SUMA(A1:A5)` sirve para:",
+    "opts": ["Contar el número de celdas en el rango", "Calcular el promedio de las celdas", "Sumar los valores de las celdas de A1 a A5", "Encontrar el valor máximo del rango"],
+    "ans": 2,
+    "exp": "La función SUMA (o SUM en inglés) suma todos los valores numéricos en un rango de celdas especificado."
+  },
+  {
+    "q": "¿Qué es el 'phishing'?",
+    "opts": ["Un tipo de virus que encripta archivos", "Un método para mejorar la señal Wi-Fi", "Un intento de obtener información confidencial (contraseñas, datos bancarios) suplantando una identidad", "Un software para limpiar archivos basura del ordenador"],
+    "ans": 2,
+    "exp": "El phishing es una técnica de ingeniería social para engañar a los usuarios y robar sus credenciales."
+  },
+  {
+    "q": "HTML (HyperText Markup Language) se utiliza para:",
+    "opts": ["Dar estilo y diseño a una página web", "Estructurar el contenido de una página web", "Programar la lógica y la interactividad de una web", "Gestionar bases de datos en un servidor"],
+    "ans": 1,
+    "exp": "HTML define la estructura semántica (títulos, párrafos, enlaces, etc.), mientras que CSS da el estilo y JavaScript la interactividad."
+  },
+  {
+    "q": "Una base de datos relacional organiza la información en:",
+    "opts": ["Documentos de texto plano", "Archivos XML", "Tablas con filas y columnas", "Una única lista sin estructura"],
+    "ans": 2,
+    "exp": "Las bases de datos relacionales, como MySQL o PostgreSQL, usan tablas que se relacionan entre sí mediante claves."
+  },
+  {
+    "q": "En presentaciones (como PowerPoint o Google Slides), ¿qué es una 'transición'?",
+    "opts": ["El efecto visual para pasar de una diapositiva a la siguiente", "La animación de un objeto dentro de una diapositiva", "El tipo de letra utilizado en el texto", "El diseño de fondo de la presentación"],
+    "ans": 0,
+    "exp": "La transición es el efecto entre diapositivas, mientras que la animación es el movimiento de elementos dentro de una misma diapositiva."
+  },
+  {
+    "q": "La unidad básica de información en informática es el:",
+    "opts": ["Byte", "Bit", "Hertz", "Pixel"],
+    "ans": 1,
+    "exp": "Un bit es la unidad más pequeña y puede tener un valor de 0 o 1. Un byte está compuesto por 8 bits."
+  },
+  {
+    "q": "El software 'open source' (código abierto) se caracteriza por:",
+    "opts": ["Ser siempre gratuito", "Tener su código fuente disponible para que cualquiera pueda verlo y modificarlo", "Pertenecer exclusivamente a grandes empresas como Microsoft o Google", "No necesitar actualizaciones"],
+    "ans": 1,
+    "exp": "La principal característica del software de código abierto es que su código fuente es público y puede ser modificado y distribuido."
+  },
+  {
+    "q": "La 'nube' (cloud computing) se refiere a:",
+    "opts": ["El almacenamiento en un disco duro externo", "Una red de ordenadores conectados por Bluetooth", "Servidores remotos en Internet donde se almacenan y procesan datos", "El sistema de archivos de tu propio ordenador"],
+    "ans": 2,
+    "exp": "La nube es un conjunto de servidores accesibles a través de Internet que ofrecen servicios de almacenamiento, computación, etc."
+  },
+  {
+    "q": "Para que una contraseña sea segura, se recomienda que:",
+    "opts": ["Sea corta y fácil de recordar, como '1234'", "Use solo letras minúsculas", "Combine mayúsculas, minúsculas, números y símbolos, y sea larga", "Sea la misma para todas tus cuentas"],
+    "ans": 2,
+    "exp": "Una contraseña robusta es larga y compleja, mezclando diferentes tipos de caracteres para dificultar que sea adivinada."
+  },
+  {
+    "q": "El formato de imagen que permite transparencias es:",
+    "opts": [".JPG", ".BMP", ".GIF", ".PNG"],
+    "ans": 3,
+    "exp": "El formato PNG (Portable Network Graphics) soporta un canal alfa, lo que permite transparencias de alta calidad."
+  }
+]
